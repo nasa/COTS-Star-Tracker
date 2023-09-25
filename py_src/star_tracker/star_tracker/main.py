@@ -92,8 +92,11 @@ def star_tracker(img_file_name, cam_config_file_name, m=None, q=None, x_cat=None
             cv2.circle(mask, (int(centroid[0]), int(centroid[1])), radius=0, color=(255, 255, 255), thickness=-1)
 
         mask = np.ma.masked_where(mask < 1, mask)
+        fig = plt.figure()
         plt.imshow(img, cmap="Greys_r")
         plt.imshow(mask, cmap="gist_rainbow")
+        plt.title("Greyscale image with all centroids")
+        fig.tight_layout()
         plt.show()
 
     intensities = intensities.squeeze()
@@ -112,8 +115,11 @@ def star_tracker(img_file_name, cam_config_file_name, m=None, q=None, x_cat=None
             cv2.circle(mask, (int(centroid[0]), int(centroid[1])), radius=0, color=(255, 255, 255), thickness=-1)
 
         mask = np.ma.masked_where(mask < 1, mask)
+        fig = plt.figure()
         plt.imshow(img, cmap="Greys_r")
         plt.imshow(mask, cmap="gist_rainbow")
+        plt.title("Greyscale image with selected centroids")
+        fig.tight_layout()
         plt.show()
 
     cinv = cam.cam_matrix_inv(camera_matrix)

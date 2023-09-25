@@ -96,6 +96,7 @@ for fname in images:
     if ret == True:
 
         print("    found corners!")
+        image_size = (img.shape[1],img.shape[0]) # tuple required, input args flipped
         objpoints.append(objp)
 
         cv2.cornerSubPix(gray,corners,(11,11),(-1,-1),criteria)
@@ -106,21 +107,28 @@ for fname in images:
         cv2.imshow('img',img)
         cv2.waitKey(500)
 
+
 cv2.destroyAllWindows()
 
 
 # THE CAL
 start_time = time.time()
-ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None,flags=cv2.CALIB_FIX_PRINCIPAL_POINT)
+RMS_reproj_err_pix, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, image_size, None, None, flags=(cv2.CALIB_FIX_PRINCIPAL_POINT))
+[fovx, fovy, fl, pp, ar] = cv2.calibrationMatrixValues(mtx, image_size, 4.8e-3*image_size[0], 4.8e-3*image_size[1] ) # Note that this may not work without an accurate detector size (Args 3 and 4)
 
-print("\nCamera parameter estimation(calibration) complete in " + str(time.time()-start_time) + "s")
-print("\n  ret: " + str(ret))
-print("\n  mtx: " + str(mtx))
-print("\n  dist: " + str(dist))
-print("\n  rvecs: " + str(rvecs))
-print("\n  tvecs: " + str(tvecs))
+print("\nCamera parameter estimation (calibration) complete in " + str(time.time()-start_time) + "s")
+print("\nReprojection Error (pix, RMS): " + str(RMS_reproj_err_pix))
+#print("\nFoV (x,y): "+str(fovx)+", "+str(fovy))
+#print("Focal Length (pix): " + str(flpix))
+print("Focal Length (mm): " + str(fl))
+print("\nCamera Matrix: "+ str(mtx))
+print("\nDist: " + str(dist))
+print("\nRvecs: " + str(rvecs))
+print("\nTvecs: " + str(tvecs))
+print("")
+    
 
-#undistort and remap to verify
+# undistort and remap to verify
 print("\n\n"+str(images[0]) + " now being undistorted to demonstrate calibration.")
 img = cv2.imread(images[0])
 
@@ -144,34 +152,37 @@ cv2.imwrite('calibresult_cropped.png',dst)
 print("...complete.  Please evaluate calibresult.png and calibresult_cropped.png to determine if they are less distorted than the original.")
 
 
+# populate dict
+dist_l=dist.tolist()
+#newcameramtx_l = mtx.tolist()
+newcameramtx_l = newcameramtx.tolist()
+# in this case, cy is vp and cx is up.
+cam_cal_dict = {'camera_matrix': newcameramtx_l, 'dist_coefs': dist_l, 'resolution':[image_size[0],image_size[1]], 'camera_model':'Brown','k1':dist_l[0][0],'k2':dist_l[0][1],'k3':dist_l[0][4],'p1':dist_l[0][2],'p2':dist_l[0][3],'fx':newcameramtx_l[0][0],'fy':newcameramtx_l[1][1],'up':newcameramtx_l[0][2],'vp':newcameramtx_l[1][2],'skew':newcameramtx_l[0][1], 'RMS_reproj_err_pix':RMS_reproj_err_pix}
+
 #save if it's good
 usr_in = input('\n\n\nIf you are satisfied with the results, provide a file name.  Otherwise, enter "no". [no/file_name]: ')
 
-if usr_in in ['n', 'no', 'N', 'No', 'NO']:
+usr_in=usr_in.lower()
+if usr_in in ['n', 'no']:
     sys.exit()
-
-#populate dict
-dist_l=dist.tolist()
-newcameramtx_l = newcameramtx.tolist()
-#in this case, cy is vp and cx is up.  Skew always 0 in opencv??
-cam_cal_dict = {'camera_matrix': newcameramtx_l, 'dist_coefs': dist_l, 'resolution':[w2,h2], 'CameraModel':'Brown','k1':dist_l[0][0],'k2':dist_l[0][1],'k3':dist_l[0][4],'p1':dist_l[0][2],'p2':dist_l[0][3],'fx':newcameramtx_l[0][0],'fy':newcameramtx_l[1][1],'up':newcameramtx_l[0][2],'vp':newcameramtx_l[1][2],'skew':newcameramtx_l[0][1]}
-
+    
 #save
 if usr_in == '':
     usr_in = 'generic_cam_params'
 usr_in_split = usr_in.split('.json')
 usr_in = usr_in_split[0]
-cam_cal_dir = os.path.dirname(os.path.realpath(__file__))
+checkerboard_dir = os.path.dirname(os.path.realpath(__file__))
+cam_cal_dir = os.path.dirname(checkerboard_dir)
 tools_dir = os.path.dirname(cam_cal_dir)
 py_src_dir = os.path.dirname(tools_dir)
 repo_dir = os.path.dirname(py_src_dir)
-cam_config_dir = os.path.join(repo_dir,'data/cam_config')
+cam_config_dir = os.path.join(repo_dir,'data','cam_config')
 full_cam_file_path = os.path.join(cam_config_dir,usr_in+'.json')
 with open(full_cam_file_path, 'w') as fp:
     json.dump(cam_cal_dict, fp, indent=2)
 
 
-print("\n\ncamera parameter file saved to: " + str(full_cam_file_path) +"\n\n")
+print("\n\nCamera parameter file saved to: " + str(full_cam_file_path) +"\n\n")
 
 
 

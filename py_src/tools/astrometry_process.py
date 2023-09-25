@@ -92,7 +92,7 @@ for image_name in iterator_image_list:
             # got a result, so terminate
             try_again = False
 
-    print("\n"+str((n/len(image_list)*100))+"% complete overall")
+    print("\n"+str((n/len(image_list)*100))[:8]+"% complete overall")
     print(image_name)
     processed_image_list+=[image_name]
     if wcs_header:

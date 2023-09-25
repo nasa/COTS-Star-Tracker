@@ -51,9 +51,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
 import os
 import cv2
 import time
-import cam_matrix
 import numpy as np
 import star_tracker.ground as ground
+import star_tracker.cam_matrix as cam_matrix
 
 #############################################################
 #USER-INPUT VARS

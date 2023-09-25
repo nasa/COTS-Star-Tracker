@@ -37,41 +37,40 @@ low_thresh_pxl_intensity = None
 hi_thresh_pxl_intensity = None
 
 VERBOSE = True # set True for prints on results
-graphics = False # set True for graphics throughout the solve process
+graphics = True # set True for graphics throughout the solve process
 
 
-data_path = '' # path to your data
-cam_config_file = '' # the name of your camera config file, assumed to be in the data/camera_cal directory
-darkframe_file = '' # the name of your darkfile file, assumed to be in the data_path directory
+data_path = '' # full path to your data
+image_path = '' # full path to your images
+cam_config_file_path = '' # full path (including filename) of your cam config file
+darkframe_file_path = '' # full path (including filename) of your darkframe file
 image_extension = ".jpg" # the image extension to search for in the data_path directory
+cat_prefix ='' # if the catalog has a prefix, define it here
 
 ################################
 #SUPPORT FUNCTIONS
 ################################
 
 
-
 ################################
 #MAIN CODE
 ################################
-
 #load star tracker stuff
-cam_cal_dir = data_path
-input_data_dir = data_path
+if darkframe_file_path == '': darkframe_file_path = None
+if darkframe_file_path is not None:
+    if not os.path.exists(darkframe_file_path):
+        darkframe_file_path = None
+        print("unable to find provided darkframe file, proceeding without one...")
+    else:    print("darkframe file: " + darkframe_file_path)
+else:    print("no darkframe file provided, proceeding without one...")
 
-if darkframe_file == '': darkframe_file = None
-if darkframe_file is not None:
-    darkframe_file = os.path.join(data_path, darkframe_file)
-    if not os.path.exists(darkframe_file): darkframe_file = None
-    print("darkframe file (None means unable to find): " + darkframe_file)
+k = np.load(os.path.join(data_path, cat_prefix+'k.npy'))
+m = np.load(os.path.join(data_path, cat_prefix+'m.npy'))
+q = np.load(os.path.join(data_path, cat_prefix+'q.npy'))
+x_cat = np.load(os.path.join(data_path, cat_prefix+'u.npy'))
+indexed_star_pairs = np.load(os.path.join(data_path, cat_prefix+'indexed_star_pairs.npy'))
 
-k = np.load(os.path.join(data_path, 'k.npy'))
-m = np.load(os.path.join(data_path, 'm.npy'))
-q = np.load(os.path.join(data_path, 'q.npy'))
-x_cat = np.load(os.path.join(data_path, 'u.npy'))
-indexed_star_pairs = np.load(os.path.join(data_path, 'indexed_star_pairs.npy'))
-
-cam_file = os.path.join(cam_cal_dir, cam_config_file)
+cam_file = cam_config_file_path
 camera_matrix, _, _ = read_cam_json(cam_file)
 dx = camera_matrix[0, 0]
 isa_thresh = starMatchPixelTol*(1/dx)
@@ -107,7 +106,7 @@ for image_filename in image_names:
     solve_start_time = time.time()
 
     q_est, idmatch, nmatches, x_obs, rtrnd_img = main.star_tracker(
-            image_filename, cam_file, m=m, q=q, x_cat=x_cat, k=k, indexed_star_pairs=indexed_star_pairs, darkframe_file=darkframe_file, 
+            image_filename, cam_file, m=m, q=q, x_cat=x_cat, k=k, indexed_star_pairs=indexed_star_pairs, darkframe_file=darkframe_file_path, 
             min_star_area=min_star_area, max_star_area=max_star_area, isa_thresh=isa_thresh, nmatch=nmatch, n_stars=max_num_stars_to_process,
             low_thresh_pxl_intensity=low_thresh_pxl_intensity,hi_thresh_pxl_intensity=hi_thresh_pxl_intensity,graphics=graphics,verbose=VERBOSE)
 
@@ -159,8 +158,5 @@ print("\n\n took " + str(time.time()-total_start) + " seconds to complete \n\n")
 print("data saved to: " +filename)
 
 print("\n\nTHE END\n\n")
-
-
-
 
 

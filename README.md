@@ -55,3 +55,6 @@ capability and fix bugs and then submit merge/pull requests to have their improv
 ## High-Level Release Notes
 
 * v1.0: initial release
+* v1.1: improved docs, bug fixes, new camera calibration method
+
+

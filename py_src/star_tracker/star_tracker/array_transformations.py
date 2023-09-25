@@ -218,7 +218,7 @@ def vector_array_transform(transform_matrix, v):
     # TODO: add checks/input verification
     # Performs matrix multiplication using numpy arrays rather than using matrix
     import numpy as np
-    if len(v.shape) is 1:
+    if len(v.shape) == 1:
         v = v[np.newaxis].T
     # assert len(transform_matrix[0]) == len(v)
     return np.einsum('ij,jk->ik', transform_matrix, v)
@@ -226,7 +226,7 @@ def vector_array_transform(transform_matrix, v):
 
 def matrix_multiplication(mat1, *argv):
     mat_result = mat1
-    if argv is None:
+    if argv == None:
         return mat_result
     for mat in argv:
         if len(mat_result[0]) == len(mat):
@@ -236,9 +236,9 @@ def matrix_multiplication(mat1, *argv):
 
 
 def sub_ind_format(output_fmt):
-    if output_fmt is not 'M' and output_fmt is not 'P':
+    if output_fmt != 'M' and output_fmt != 'P':
         raise ValueError("ERROR ["+str(__name__)+"]: Invalid input for format type")
-    return 0 if output_fmt is 'P' else 1
+    return 0 if output_fmt == 'P' else 1
 
 
 
@@ -277,7 +277,7 @@ def check_axis(arr, dim, axis=None):
     #  | x1 x2 x3 |
     #  | y1 y2 y3 |
     import numpy as np
-    if type(arr) is not np.ndarray:
+    if type(arr) != np.ndarray:
         raise TypeError("ERROR ["+str(__name__)+"]: Input array is not ndarray")
     # determine/verify if star pairs are row or column vectors according to axis
     shape = arr.shape
@@ -286,11 +286,11 @@ def check_axis(arr, dim, axis=None):
     nrows, ncols = (0, shape[0]) if ndims == 1 else (shape[0], shape[1])
     if ndims > 2:
         raise ValueError("ERROR ["+str(__name__)+"]: Input array has more than two dimensions "+str(ndims))
-    if shape[0] is 0:
+    if shape[0] == 0:
         raise ValueError("ERROR ["+str(__name__)+"]: Numpy array is empty")
     if (nrows != dim and ncols != dim) or dim < 1:
         raise ValueError("ERROR ["+str(__name__)+"]: Length of vector array must by nx2 or 2xn")
-    if axis is None:
+    if axis == None:
         if nrows == ncols:
             raise ValueError("ERROR ["+str(__name__)+"]: Length is equal for star pairs and no axis provided")
         # TODO: verify that every function returns the same axis \\

@@ -22,11 +22,9 @@ import time
 ################################
 #ensure user has set locale and time
 usr_in = input('Before running this script, you should set the system locale and time.  Have you done this? [Y/N]: ')
-
 usr_in=str(usr_in)
-print(usr_in)
-
-if usr_in != 'y' and usr_in != 'Y' and usr_in != 'yes' and usr_in != 'YES' and usr_in != 'Yes' and usr_in != 'heck yeah':
+usr_in=usr_in.lower()
+if usr_in != 'y' and usr_in != 'yes' and usr_in != 'heck yeah':
     print('\n\nset the system locale and time, restart the system, and then try again')
     sys.exit()
 

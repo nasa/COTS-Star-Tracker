@@ -27,13 +27,20 @@ be noted that it's up to the user to determine the appropriate level of rigor to
         * place the key in tools/astrometry_process.py
         * add the path to the directory with the images you'd like to process into the script
         * run the script to automatically have astrometry.net solve the images and record the results: sudo python3 astrometry_process.py
+        * an interruption in your internet connection may cause the script to fail.  If that happens:
+            * delete the results files with the erroneous "failures"
+            * set the 'crash_recovery' variable to True
+            * restart the astrometry_process.py script
+        * note that it may take on average 20 seconds to successfully solve an image and up to 10 minutes to return a failed solution.  The script has a default timeout of 3600 seconds.
+        * the script will create a csv file with the name CURRENT_DATE_astrometry_output_FINAL.csv that contains the Right Ascension, Declination, solve time, and image name
+            * for those images that failed to solve, the Right Ascension and Declination will be 999
 4. Compare the results
     * In order to compare to astrometry.net, use the tools/astrometry_output_comparison.py script
         * edit the USER INPUT section in tools/astrometry_output_comparison.py
         * run the script: python3 astrometry_output_comparison.py
         * when finished, plots should appear comparing the output of the COTS Star Tracker algorithm and astrometry.net
 5.  Adjust the camera and/or star tracker parameters and repeat
-    * the graphics and verbose flags of the star tracker algorithm can provide significant insight into how the algorithm is processing imagery.  Use the output to refine the function inputs until the desired results are achieved.
+    * The graphics and verbose flags of the star tracker algorithm can provide significant insight into how the algorithm is processing imagery.  Use the output to refine the function inputs until the desired results are achieved.
 
 
 ## 5.2 Flight Setup

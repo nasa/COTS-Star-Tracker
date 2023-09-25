@@ -17,7 +17,7 @@ from setuptools import setup, find_packages
 #MAIN CODE
 ################################
 setup(name='COTS_star_tracker',
-      version='1.0',
+      version='1.1',
       description='Open-source framework intended to allow inexperienced users to use COTS cameras and computers to estimate the inertial attitude of the captured images.',
       url='https://github.com/nasa/COTS-Star-Tracker',
       author='NASA',

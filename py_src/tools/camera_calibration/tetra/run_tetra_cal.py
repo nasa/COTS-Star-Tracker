@@ -13,6 +13,7 @@ inputs for the opencv camera calibration routine
 import os
 import sys
 import cv2
+import glob
 import json
 import time
 import pathlib
@@ -30,8 +31,9 @@ path_to_images = ''
 image_file_extension = '.jpg'
 darkframe_filename = ''
 estimated_full_angle_fov = 20
-
 verbose = True
+
+
 ################################
 #MAIN CODE
 ################################
@@ -71,26 +73,31 @@ solution_list = []
 AllProjs = np.array([[0,0,0]])
 AllCents = np.array([[0,0]])
 num_images = 0
-for impath in path.glob('*'+image_file_extension):
+
+image_files = glob.glob(os.path.join(path,'*'+image_file_extension))
+
+for impath in image_files:
 
         num_images+=1
-        print('Attempting to solve image: ' + str(impath))
+        print("Attempting to solve image " + str(num_images)+" of "+str(len(image_files))+": " + str(impath))
         start_time = time.time()
 
         img = cv2.imread(str(impath), cv2.IMREAD_GRAYSCALE)
         if img is None:
-            print("ERROR ["+str(__name__)+"]:Image file "+impath+" does not exist in path. ")
+            print("    ERROR ["+str(__name__)+"]:Image file "+impath+" does not exist in path. ")
             sys.exit()
-        if verbose: print('Loaded image in {} seconds'.format(time.time()-start_time))
+        if verbose: print("    Loaded image in {} seconds".format(round((time.time()-start_time),3)))
         image_size = (img.shape[1],img.shape[0]) # tuple required, input args flipped
 
         if darkframe_filename is not None:
             darkframe = cv2.imread(darkframe_filename, cv2.IMREAD_GRAYSCALE)
             img = cv2.subtract(img, darkframe)
 
+        start_time = time.time() #reset timer
+
         solved = t3.solve_from_image(img, fov_estimate=estimated_full_angle_fov)  # Adding e.g. fov_estimate=11.4, fov_max_error=.1 may improve performance
 
-        try:
+        if solved['Matches'] is not None:
             Vecs = []
             ProjVecs = []
             R = solved['Rmat']
@@ -122,10 +129,10 @@ for impath in path.glob('*'+image_file_extension):
 
             imgdict = {'R_inertial_to_camera_guess': R, 'uvd_meas': Cents, 'CAT_FOV':Vecs, 'Projections':ProjVecs, 'NumStars': len(Vecs), 'FOV': solved['FOV']}
             solution_list.append(imgdict)
-            print("    ...success! (took " +str(time.time()-start_time)[:8]+" seconds)")
+            print("    ...solve SUCCESS (took " +str(time.time()-start_time)[:5]+" seconds) \n")
 
-        except:
-            print('    ...FAILED to solve \n')
+        else:
+            print('\n    ...FAILED to solve \n\n')
 
 # if some of the images were solved, use the solutions to calibrate the camera
 if len(solution_list) > 0:
@@ -139,6 +146,7 @@ if len(solution_list) > 0:
 
     AllCents = np.delete(AllCents, 0, axis = 0).astype('float32')
     AllProjs = np.delete(AllProjs, 0, axis = 0).astype('float32')
+
     RMS_reproj_err_pix, mtx, dist, rvecs, tvecs = cv2.calibrateCamera([AllProjs], [AllCents], image_size, matGuess, None, flags=(cv2.CALIB_USE_INTRINSIC_GUESS+cv2.CALIB_FIX_PRINCIPAL_POINT))
     [fovx, fovy, fl, pp, ar] = cv2.calibrationMatrixValues(mtx, image_size, 4.8e-3*image_size[0], 4.8e-3*image_size[1] ) # Note that this may not work without an accurate detector size (Args 3 and 4)
 
@@ -158,11 +166,24 @@ if len(solution_list) > 0:
     # in this case, cy is vp and cx is up.
     cam_cal_dict = {'camera_matrix': newcameramtx_l, 'dist_coefs': dist_l, 'resolution':[image_size[0],image_size[1]], 'camera_model':'Brown','k1':dist_l[0][0],'k2':dist_l[0][1],'k3':dist_l[0][4],'p1':dist_l[0][2],'p2':dist_l[0][3],'fx':newcameramtx_l[0][0],'fy':newcameramtx_l[1][1],'up':newcameramtx_l[0][2],'vp':newcameramtx_l[1][2],'skew':newcameramtx_l[0][1], 'RMS_reproj_err_pix':RMS_reproj_err_pix}
 
-    # save
-    usr_in = 'generic_cam_params'
+    #save if it's good
+    usr_in = input('\n\n\nIf you are satisfied with the results, provide a file name.  Otherwise, enter "no". [no/file_name]: ')
+
+    usr_in=usr_in.lower()
+    if usr_in in ['n', 'no']:
+        sys.exit()
+    
+    #save
+    if usr_in == '':
+        usr_in = 'generic_cam_params'
     usr_in_split = usr_in.split('.json')
     usr_in = usr_in_split[0]
-    cam_config_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))),'data','cam_config')
+    tetra_dir = os.path.dirname(os.path.realpath(__file__))
+    cam_cal_dir = os.path.dirname(tetra_dir)
+    tools_dir = os.path.dirname(cam_cal_dir)
+    py_src_dir = os.path.dirname(tools_dir)
+    repo_dir = os.path.dirname(py_src_dir)
+    cam_config_dir = os.path.join(repo_dir,'data','cam_config')
     full_cam_file_path = os.path.join(cam_config_dir,usr_in+'.json')
     with open(full_cam_file_path, 'w') as fp:
         json.dump(cam_cal_dict, fp, indent=2)

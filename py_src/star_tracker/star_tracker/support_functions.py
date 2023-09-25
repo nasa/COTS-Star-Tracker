@@ -124,13 +124,16 @@ def reproject(img, c, idmatch, q_est, x_obs=None, x_cat=None):
     figsize = width / float(dpi), height / float(dpi)
 
     # Create a figure of the right size with one axes that takes up the full figure
-    fig = plt.figure(figsize=figsize)
+    #fig = plt.figure(figsize=figsize)
+    fig=plt.figure()
     ax = plt.subplot(111)
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-    plt.autoscale(tight=True)
+    #ax.get_xaxis().set_visible(False)
+    #ax.get_yaxis().set_visible(False)
+    #plt.autoscale(tight=True)
     # plt.axis('off')
+
     imgplot = plt.imshow(img, cmap='Greys_r')
+
 
     row = 1
     col = 0
@@ -153,12 +156,15 @@ def reproject(img, c, idmatch, q_est, x_obs=None, x_cat=None):
                  markersize=25, markerfacecolor="None",
                  label="Unmatched catalog stars")
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, labels, loc='lower left', prop={'size': 20})
+    #ax.legend(handles, labels, loc='lower left', prop={'size': 20})
+    ax.legend(handles, labels, loc='best', prop={'size': 20})
+    fig.tight_layout()
+
     plt.show()
 
 
-def find_candidate_stars(img, low_thresh, hi_thresh,
-                         min_star_area, max_star_area, graphics=False):
+def find_candidate_stars(img, low_thresh=None, hi_thresh=None,
+                         min_star_area=3, max_star_area=400, graphics=False):
     import numpy as np
     import cv2
     from rpi_core import calculate_center_intensity
@@ -188,10 +194,21 @@ def find_candidate_stars(img, low_thresh, hi_thresh,
             im_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) #opencv2 and 4
 
     if graphics:
+
+        # Create a blank canvas
+        height, width = img.shape
+        canvas = np.zeros((height, width, 3), dtype=np.uint8)
+
         import matplotlib.pyplot as plt
-        #cv2.drawContours(img, contours, -1, (0,255,0), 3) TODO look into fixing this
-        #cv2.imshow('wow1',img) #this did not result in contours drawing.  Would be nice to somehow show contours
-        plt.imshow(im_binary), plt.show()
+        #cv2.drawContours(canvas, contours, -1, (0,255,0), 3)
+        #cv2.imshow('Contours',canvas)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
+        fig = plt.figure()
+        plt.imshow(im_binary)
+        plt.title("Binary image")
+        fig.tight_layout()
+        plt.show()
 
 
     print("Found " + str(len(contours)) + " contours")
@@ -232,10 +249,9 @@ def find_candidate_stars(img, low_thresh, hi_thresh,
         centroids = np.array(centroids)
         intensity = np.array(intensity)
         print("Found " + str(len(centroids)) + " centroids")
-        #print(centroids)
 
         return centroids, intensity
-     '''
+    '''
 
 
 

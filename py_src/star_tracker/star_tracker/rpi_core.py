@@ -278,6 +278,8 @@ def attitude_svd(ei, es):
     d = np.linalg.det(U)*np.linalg.det(V)
     M = np.array([[1, 0, 0], [0, 1, 0], [0, 0, d]])
     T = U.dot(M).dot(V)
+    det_T = np.linalg.det(T)
+    if det_T < 0: print("\n\n    WARNING: DETERMINANT IS NEGATIVE IN attitude_svd    \n\n")
     return T
 
 
@@ -460,7 +462,7 @@ def calculate_center_intensity(img, stats, min_star_area, max_star_area):
         intensity_sum = np.sum(intensity)
         intensities[count, :] = intensity_sum
 
-        #TODO: FIXME: intensity sum can sometimes be 0, which kills everything.  How can it be 0?!
+        #TODO: FIXME: intensity sum can sometimes be 0
 
         #print('-----')
         #print(intensity)

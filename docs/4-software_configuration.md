@@ -24,8 +24,11 @@ the configuration of this system.
 3. point the script to the camera parameter file.  Camera parameters are used to more intelligently create the catalog.
 4. point the script to the directory where images are stored to be used to create the darkframe
 5. Run the star_catalog_creator.py script
-    * This can be fairly time consuming on slower single board computers like the Raspberry Pi 3B+
-    * After the catalog creation, the script will also attempt to create a darkframe from images in the data directory.  If there are none, it will fail, but the catalog will still be good to go.
+    * This can be fairly time consuming on slower single board computers like the Raspberry Pi 3B+.  It may be advisable to do this step on a faster computer than the flight unit.
+6. Optionally, a darkframe can be created with the tools/create_darkframe.py script
+    * Update the path_to_images variable in the tools/create_darkframe.py script
+    * The default num_images of 7 is suitable for most applications, but you can change it as required
+    * When run, the script will create a darkframe image named 'autogen_darkframe' in the path_to_images directory
 
 
 ## 4.2 Star Tracker Algorithm Setup
@@ -69,7 +72,7 @@ the script(s) in the 'examples' directory before continuing.
             * this defaults to 'False', which disables verbose printing.  When troubleshooting, set to 'True' to see text output of the algorithm throughout the process.
 4. The star_tracker function will return a quaternion estimate, list of matches, number of matches, x_obs, and the image after manipulation
     * first return (array): quaternion
-        * quaternion is right-handed, scalar last.
+        * quaternion is right-handed, scalar last
     * second return (array): idmatch
         * array of matches from the triangle_isa_id function
     * third return (integer): nmatches
@@ -97,3 +100,19 @@ is still very immature and there are many exceptions that have yet to be caught.
     * Warnings don't necessarily have to be acted on, but the user should be aware when they are happening and what their impact is
 * Errors: these are situations where the software can not continue and will exit.  This requires a user to make a change to the software inputs to allow the software to function.
     * An error should be displayed in the terminal output in this way: "ERROR [star_tracker.function_name]: description of the error"
+	
+For further insight into the performance, the main.star_tracker function has a graphics and a verbose keyword argument.
+* As briefly described above, setting either to True will enable additional output.
+* The graphics will show several screens, including:
+    1. The binary threshold image
+        * This image can be used to determine if stars are suitably unique blobs
+        * If not, the binary threshold parameters can be tuned
+        * If lots of noise or dead pixels are present, a darkframe may improve the result
+    2. Resulting identified blobs, marked by red circles, overlaid on the image
+        * This image can be used to verify the star size settings.  If stars are visible and not circled, then the max/min star size may need to be adjusted.
+        * If the centers of the circle do not appear to be on the center of the blobs, this may indicate a better camera calibration is needed or changes to the camera or test setup to reduce blur/motion/etc.
+    3. The blobs that will actually be used for catalog matching (should be the largest in the image)
+    4. Algorithm final results overlaid on the image, including matched candidates (green/blue squares), matched catalog stars (green diamonds), invalid candidates (red triangles), and unmatched catalog stars (red circles)
+        * If there are many overlaid squares and diamonds and few overlaid circles and triangles, this suggests the algorithm is functioning well
+        * If there are few overlaid squares and diamonds and many overlaid circles and triangles, this suggests that a better camera calibration may be required
+
