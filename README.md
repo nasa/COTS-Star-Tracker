@@ -20,7 +20,7 @@ IT IS STRONGLY RECOMMENDED THAT YOU READ THE ENTIRETY OF THE /DOCS DIRECTORY AND
 * [High-Level Functionality](#high-level-functionality)
 * [Questions Comments and Concerns](#questions-comments-and-concerns)
 * [High-Level Release Notes](#high-level-release-notes)
-
+* [Related NASA Resources](#related-nasa-resources)
 
 ## High-Level Use
 
@@ -56,5 +56,25 @@ capability and fix bugs and then submit merge/pull requests to have their improv
 
 * v1.0: initial release
 * v1.1: improved docs, bug fixes, new camera calibration method
+
+
+## Related NASA Resources
+
+### GIANT
+
+The COTS Star Tracker is "flight" software for performing attitude estimation from star field images and geometric camera calibration.  
+For other image-based navigation needs we encourage you to check out our partner project, the [Goddard Image Analysis and Navigation Tool (GIANT)](https://github.com/nasa/giant), which is ground software providing a larger set of navigation, calibration, and science capabilities.
+
+
+### Orion Optical Navigation Image Processing Software (OpNAV)
+
+The Orion emergency return system utilizing optical navigation was demonstrated on Artemis I.
+A key component is this software, which processes the images and produces navigation measurements. 
+The software is an application within the Core Flight Software of the Orion camera controller module and may be requested here: https://software.nasa.gov/software/MSC-26456-1
+
+
+
+
+
 
 
