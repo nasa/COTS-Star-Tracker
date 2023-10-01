@@ -26,7 +26,7 @@ import time
 ################################
 # install/update python stuff
 os.system('pip3 install pip --upgrade --user')
-os.system('pip3 install opencv-contrib-python --user')
+os.system('pip3 install "opencv-contrib-python<4.7" --user') #There are breaking changes >=4.7
 os.system('pip3 install psutil --user')
 os.system('pip3 install imageio') #required for catalog creation
 os.system('pip3 install astropy') #required for catalog creation
