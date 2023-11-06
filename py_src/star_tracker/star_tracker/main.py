@@ -78,11 +78,9 @@ def star_tracker(img_file_name, cam_config_file_name, m=None, q=None, x_cat=None
         return q_est, idmatch, nmatches, x_obs, img
 
     if undist_img_bool is True:
-        centroidsUnd = centroids.reshape(len(centroids), 1, 2)
-        undistorted_centroids_offsets = cv2.undistortPoints(
-            centroidsUnd, camera_matrix, dist_coefs)
-        centroids = (centroidsUnd + undistorted_centroids_offsets)
-        centroids = centroids.reshape((len(centroidsUnd), 2))
+        centroids = cv2.undistortPoints(
+            centroids[:, None], camera_matrix, dist_coefs, P=camera_matrix
+        )[:, 0]
 
     if graphics is True:
         import matplotlib.pyplot as plt
