@@ -21,7 +21,7 @@ IT IS STRONGLY RECOMMENDED THAT YOU READ THE ENTIRETY OF THE /DOCS DIRECTORY AND
 ## 1.1 Use
 It's recommended that users start here in order to understand how to successfully install, configure, and operate the system.
 The above topics are broken out into their own Markdown-formatted files to allow for easy navigation.  First-time users are recommended
-to start with this document and then proceed through the others in the docs directory in numerical order.
+to start with this document and then proceed through the others in the /docs directory in numerical order.
 
 
 ## 1.2 Background
@@ -61,34 +61,36 @@ the parameters used to configure the algorithm, mounting errors, etc.  Even when
 Tracker system is still far below that of commercially available systems (like those mentioned above).  The COTS Star Tracker is not
 meant to replace commercially available systems-- it's meant to enhance the capability of spacecraft that aren't able to accommodate them.
 
+
 ## 1.4 High-Level Description of Use
 You are again STRONGLY encouraged to read all of the documents and scripts in the /examples directory before using this software.  In order
-to provide a big-picture view to help the others docs make more sense in context, a high-level description of the steps required to use this
+to provide a big-picture view to help the others documents make more sense in context, a high-level description of the steps required to use this
 software and implement your own star tracker system follows:
 
 1. Select a camera and lens
-    * Not all cameras are created equal.  We do not recommend those that only support basic UVC drivers
+    * Not all cameras are created equal.  We do not recommend those that only support basic UVC drivers.
 2. Interface the camera to your computer
     * This is both hardware and software.  Example interface scripts for several camera manufacturers are included in the /examples directory.
 3. Calibrate your camera and lens
     * Set your camera/lens focus and aperture as they would be in flight (you can use stars on a clear night to help you set these well).
-    * Collect a series of images with the camera/lens of either checkerboard targets or stars such that you get good coverage across the field of view.
-    * Appropriately process the images (using checkerboard cal for the checkerboard and Tetra cal for the star fields).
+    * Collect a series of images with the camera/lens of either checkerboard/ChArUco targets or stars such that you get good coverage across the field of view.
+    * Process the images with the appropriate calibration script (e.g., use the checkerboard calibration script if you've taken calibration images of checkerboard targets).
     * Calibration may be an iterative process-- double check all resulting values in the .json files for sanity (e.g. your focal length isn't 1E9) and aim for an RMS reprojection error < 1 pixel
 4. Build a star catalog
     * This requires the camera calibration file created in the previous step as well as user input to provide the limiting apparent magnitude for the stars that will be included in the catalog.
-    * Note that this can take a considerable amount of time on low-resource single-board computers and is best done on a "modern" desktop workstation
-5. Attempt to process images of stars.
+    * Note that this can take a considerable amount of time on low-resource single-board computers and is best done on a "modern" desktop workstation.
+5. Attempt to process images of stars
     * This can be either HWIL or an existing image set.  Tune various parameters until you get the balance of accuracy, sky coverage, and solve time that you need for your application.
     * To assess your configuration's accuracy, you can use the included scripts to process your images through astrometry.net for an independent solution.  Included scripts can also compare the resulting products.
-6. Demonstrate your system works end-to-end with hardware-in-the-loop
-    * If this wasn't done in the previous step, ensure your entire system works, including all the hardware
+6. Demonstrate your system works end-to-end with hardware-in-the-loop testing
+    * If this wasn't done in the previous step, ensure your entire system works, including all the hardware.
+
 
 ## 1.5 System Testing
 A preliminary version of the COTS Star Tracker algorithm was tested on a variety of image sets, including some taken from a synthetic generation system,
 some taken on-orbit, and some taken terrestrially.  These image sets were processed on a Raspberry Pi 3B+, an Odroid XU4Q, and a Dell Precision 7720.
 The resulting accuracy across all platforms was fairly consistent with a mean error of about 200 arc seconds.  The solve time varied significantly, with
-most solve times on the Dell being around 0.25 s, on the Pi being 2 s, and the Odroid being 1.5 s.
+most solve times on the Dell being around 0.25 s, on the Pi being 2.0 s, and the Odroid being 1.5 s.
 
 System updates and performance analysis is still in work.
 

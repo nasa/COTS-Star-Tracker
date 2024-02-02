@@ -19,13 +19,15 @@ For information on the use and verification of the software, see 5-software_use.
 This step uses the camera parameters determined in Step 3.1, the Hipparcos star catalog, and user input to create star catalog specific to
 the configuration of this system.
 
-1. open the py_src/tools/star_catalog_creator.py script in a text editor
-2. update the b_thresh variable to the appropriate value.  This is the brightest apparent magnitude that will be included in the catalog.
-3. point the script to the camera parameter file.  Camera parameters are used to more intelligently create the catalog.
-4. point the script to the directory where images are stored to be used to create the darkframe
-5. Run the star_catalog_creator.py script
-    * This can be fairly time consuming on slower single board computers like the Raspberry Pi 3B+.  It may be advisable to do this step on a faster computer than the flight unit.
-6. Optionally, a darkframe can be created with the tools/create_darkframe.py script
+1. Open the py_src/tools/star_catalog_creator.py script in a text editor.
+2. Update the b_thresh variable to the appropriate value.  This is the brightest apparent magnitude that will be included in the catalog.
+    * The larger the b_thresh value, the larger the catalog.  This can dramatically increase catalog search times.
+	* For industrial cameras, it may be good to start with a b_thresh between 5.0 and 6.0 and then to increase or decrease depending on real world performance, sky coverage requirements, and catalog search time requirements.
+3. Point the script to the camera parameter file.  Camera parameters are used to more intelligently create the catalog.
+4. Point the script to the directory where images are stored to be used to create the darkframe.
+5. Run the star_catalog_creator.py script.
+    * This can be fairly time consuming on slower computers like the Raspberry Pi 3B+.  It may be advisable to do this step on a faster computer than what projects typically use as the flight computer.
+6. Optionally, a darkframe can be created with the tools/create_darkframe.py script.
     * Update the path_to_images variable in the tools/create_darkframe.py script
     * The default num_images of 7 is suitable for most applications, but you can change it as required
     * When run, the script will create a darkframe image named 'autogen_darkframe' in the path_to_images directory
@@ -35,9 +37,9 @@ the configuration of this system.
 This step describes how to create a script that captures images, processes them, and returns an attitude estimate.  It's strongly recommended that users review
 the script(s) in the 'examples' directory before continuing.
 
-1. Create a new Python 3 script
-2. Using the camera interface previously demonstrated, call the routines required to configure the camera and capture a picture
-3. Pass the following information to the main.star_tracker function in the star_tracker library
+1. Create a new Python 3 script.
+2. Using the camera interface previously demonstrated, call the routines required to configure the camera and capture a picture.
+3. Pass the following information to the main.star_tracker function in the star_tracker library.
     * first argument (string): image filename
     * second argument (string):camera parameter filename
     * m keyword argument (numpy data): m file contents
@@ -70,7 +72,7 @@ the script(s) in the 'examples' directory before continuing.
             * this defaults to 'False', which disables graphical output.  When troubleshooting, set to 'True' to see visualizations of the algorithm throughout the process.
         * verbose keyword argument (bool): the flag to enable or disable verbose printing
             * this defaults to 'False', which disables verbose printing.  When troubleshooting, set to 'True' to see text output of the algorithm throughout the process.
-4. The star_tracker function will return a quaternion estimate, list of matches, number of matches, x_obs, and the image after manipulation
+4. The star_tracker function will return a quaternion estimate, list of matches, number of matches, x_obs, and the image after manipulation.
     * first return (array): quaternion
         * quaternion is right-handed, scalar last
     * second return (array): idmatch

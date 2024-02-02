@@ -195,7 +195,10 @@ if(charuco_img_points):
         json.dump(cam_cal_dict, fp, indent=2)
 
 
-print("\n\ncamera parameter file saved to: " + str(full_cam_file_path) +"\n\n")
+    print("\n\ncamera parameter file saved to: " + str(full_cam_file_path) +"\n\n")
+
+else:
+    print("\n\n    No targets found in any images.  Unable to complete calibration.\n\n")
 
 
 if show_plots:
