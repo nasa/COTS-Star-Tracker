@@ -147,8 +147,8 @@ def lpq_orthonormal_basis(ra_de_deg, axis=None):
         np.cos(ra_rad),
         np.zeros(len(ra_rad))])
     q_hat = np.array([
-        -np.sin(de_rad) * np.cos(de_rad),
-        -np.sin(de_rad) * np.sin(de_rad),
+        -np.sin(de_rad) * np.cos(ra_rad),
+        -np.sin(de_rad) * np.sin(ra_rad),
         np.cos(de_rad)])
     return los, p_hat, q_hat
 
