@@ -48,9 +48,7 @@ CHECKERBOARD = (number_of_target_columns-1,number_of_target_rows-1)
 # Creating vector to store vectors of 3D points for each checkerboard image
 checker_world_points_tot = []
 # Creating vector to store vectors of 2D points for each checkerboard image
-checker_img_points = [] 
-charuco_img_points = []
-charuco_ids_tot = []
+checker_img_points_tot = []
 
 # Defining the world coordinates for 3D points
 checker_world_points = np.zeros((1, CHECKERBOARD[0] * CHECKERBOARD[1], 3), np.float32)
@@ -77,7 +75,7 @@ working directory and also have the following filetype(case sensitive):""")
     sys.exit()
 
 elif len(images) < 10:
-    print("""\nIt's recommended to use at least 10 images. Please 
+    print("""\nIt's recommended to use at least 10 images. Please
 ensure your lower image count is intentional, otherwise it is
 recommended to add additional calibration images for improved results.""")
     usr_in = input("\nPress enter to continue.")
@@ -85,6 +83,8 @@ recommended to add additional calibration images for improved results.""")
 scale_percent = 100 # percent of original size
 found_corner_ctr = 0
 
+# For each image, find all corners, refine the pixel coordinates and display
+# them on the images of checker board
 for fname in images:
 
     print("\n" + str(fname))
@@ -100,59 +100,56 @@ for fname in images:
 
     # Detect ArUco markers
     corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, dictionary)
-    # print(corners)
 
-    """
-    If desired number of corner are detected, refine the pixel coordinates and display 
-    them on the images of checker board
-    """
-    if ids is not None:
-        # Refine the detected corners and obtain the ChArUco corners and ids
-        num_corners, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
-            corners, ids, gray, board=Charuco_board)
+    print("    Detected "+str(len(corners))+" corners")
 
-        print("    Detected "+str(len(corners))+" corners")
-        # If the entire ChArUco board is detected
-        if charuco_corners is not None and num_corners==16:
-            found_corner_ctr += 1
-            print("    FOUND all ArUco markers in: "+fname)
-
-            charuco_img_points.append(charuco_corners)
-            charuco_ids_tot.append(charuco_ids)
-
-            # Extract the checkerboard corners
-            checkerboard_corners = []
-            for corner in charuco_corners:
-                checkerboard_corners.append(corner[0])
-
-            checker_world_points_tot.append(checker_world_points)
-            checkerboard_corners = np.asarray(checkerboard_corners)
-            corners2 = cv2.cornerSubPix(gray, checkerboard_corners, (11,11),(-1,-1), criteria)
-            checker_img_points.append(corners2)
-            #print(checkerboard_corners)
-
-            # Draw the detected corners on the image
-            if show_plots:
-                #img = cv2.aruco.drawDetectedCornersCharuco(img, charuco_corners, charuco_ids)
-                img = cv2.drawChessboardCorners(img, CHECKERBOARD, checkerboard_corners, True)
-
-                # Show the image
-                cv2.imshow('ChArUco Reprojection', img)
-                cv2.waitKey(1)
-    else:
+    # Check if ArUco markers were found
+    if ids is None:
         print("    DID NOT FIND corners in: "+fname)
+        continue
 
-print("\n\n    Done finding corners... attempting calibration! (Using "+str(found_corner_ctr)+" of "+str(len(images))+" total images)")
- 
+    # Extract the checkerboard corners.
+    # Obtain the ChArUco corners and ids from single ArUco markers.
+    num_corners, charuco_corners, charuco_ids = cv2.aruco.interpolateCornersCharuco(
+        corners, ids, gray, board=Charuco_board)
+
+    points = checker_world_points[:, charuco_ids[:, 0]]
+    valid_corners = points[0, ..., 0] > 0
+
+    if num_corners != number_of_target_rows * number_of_target_columns:
+        print("    Not all ArUco markers are in frame"+fname)
+    else:
+        print("    FOUND all ArUco markers in: "+fname)
+
+    # Refine the detected corners to subpixel precision
+    checkerboard_corners = charuco_corners[:, 0]
+    refined_corners = cv2.cornerSubPix(gray, checkerboard_corners, (11,11), (-1,-1), criteria)
+
+    # Add detected points to lists for later calibration
+    checker_world_points_tot.append(points)
+    checker_img_points_tot.append(refined_corners)
+
+    # Draw the detected corners on the image
+    if show_plots:
+        # Use flattened shape. We lose colored rows, but incomplete patterns are drawn correctly
+        size = (len(checkerboard_corners), 1)
+        img = cv2.drawChessboardCorners(img, size, checkerboard_corners, True)
+
+        # Show the image
+        cv2.imshow('ChArUco Reprojection', img)
+        cv2.waitKey(1)
+
+print("\n\n    Done finding corners... attempting calibration! (Using "+str(len(checker_img_points_tot))+" of "+str(len(images))+" total images)")
+
 """
-Performing camera calibration by 
-passing the value of known 3D points (checker_world_pointsoints)
-and corresponding pixel coordinates of the 
-detected corners (checker_img_points)
+Performing camera calibration by
+passing the value of known 3D points (checker_world_points_tot)
+and corresponding pixel coordinates of the
+detected corners (checker_img_points_tot)
 """
-if(charuco_img_points):
+if(checker_img_points_tot):
     RMS_reproj_err_pix, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
-        checker_world_points_tot, checker_img_points, gray.shape[::-1], None, None,flags=cv2.CALIB_FIX_PRINCIPAL_POINT)
+        checker_world_points_tot, checker_img_points_tot, gray.shape[::-1], None, None,flags=cv2.CALIB_FIX_PRINCIPAL_POINT)
 
     print("\nReprojection Error (pix, RMS): " + str(RMS_reproj_err_pix))
     print("\nCamera Matrix: "+ str(mtx))
