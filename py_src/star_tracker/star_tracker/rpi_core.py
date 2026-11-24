@@ -294,9 +294,9 @@ def triangle_isa_id(x_obs, x_cat, idx_star_pairs, isa_thresh, nmatch,
     start_time = time.time()
     if watchdog is None: watchdog = 3600 #if no watchdog was provided, set it to an hour
     nmatches = 0
-    nmatch_array = [] #used for troubleshooting
-    unsolved_potentials = 0 #used for troubleshooting
-    solved_potentials = 0 #used for troubleshooting
+    nmatch_array = [] # used for troubleshooting
+    unsolved_potentials = 0 # used for troubleshooting
+    solved_potentials = 0 # used for troubleshooting
     idmatch = np.zeros(len(x_obs[0]))
     q_est = np.empty((4, ))
     q_est.fill(np.nan)
@@ -310,7 +310,12 @@ def triangle_isa_id(x_obs, x_cat, idx_star_pairs, isa_thresh, nmatch,
     n_obs = len(x_obs[0])
     if n_obs < nmatch:
         if verbose: print('Insufficient number of candidates to process for attitude estimation')
+        q_est[3] = 401 # error code for failure to find sufficient nmatch
+        q_est[0] = n_obs # error details-- capture number of candidates
+        q_est[1] = nmatches # error details-- capture nmatches
+
         return q_est, idmatch, nmatches
+
     mm = enhanced_pattern_shifting(np.arange(0, n_obs, 1, dtype=int))
 
     if verbose: print("    [triangle_isa_id]: length of enhanced pattern shifting return: " + str(len(mm)))
@@ -350,7 +355,10 @@ def triangle_isa_id(x_obs, x_cat, idx_star_pairs, isa_thresh, nmatch,
                 idmatch = np.zeros(len(x_obs[0]))
                 q_est = np.empty((4, ))
                 q_est.fill(np.nan)
-                if verbose: print("    [triangle_isa_id]: hit watchdog timeout (" + str(time.time()-start_time)+"s of "+str(watchdog)+"s")
+                q_est[3] = 408 # error code for watchdog timeout
+                q_est[0] = 0 # unused error code field
+                q_est[1] = 0 # unused error code field
+                if verbose: print("    [triangle_isa_id]: hit watchdog timeout (" + str(time.time()-start_time)+"s of "+str(watchdog)+"s)")
                 return q_est, idmatch, nmatches
 
             # if we find that the number of matches above are both 1,
@@ -408,7 +416,7 @@ def triangle_isa_id(x_obs, x_cat, idx_star_pairs, isa_thresh, nmatch,
 
                         return q_est, idmatch, nmatches
 
-    # if no attitude found, return an attitude matrix of nan's
+    # if no attitude found, return error code embedded in quaternion
     if verbose:
         print("    [triangle_isa_id]: Failed-- found "+str(nmatches)+" matches")
         print("    [triangle_isa_id]: nmatch array len: " +str(len(nmatch_array)))
@@ -421,10 +429,20 @@ def triangle_isa_id(x_obs, x_cat, idx_star_pairs, isa_thresh, nmatch,
         print("    [triangle_isa_id]: unsolved_potentials: " +str(unsolved_potentials))
         print("    [triangle_isa_id]: solved_potentials: " +str(solved_potentials))
 
+    # record number of nmatches successfully found
     nmatches = 0
+    for n in [5,4,3,2,1,0]:
+        if nmatch_array.count(n) == 0:
+            nmatches = n-1
+            if nmatches < 1: nmatches = 0
+
+    #print(nmatches)
     idmatch = np.zeros(len(x_obs[0]))
     q_est = np.empty((4, ))
     q_est.fill(np.nan)
+    q_est[3] = 402 # error code for failure to find sufficient nmatch
+    q_est[0] = 0 # unused error code field
+    q_est[1] = nmatches # error details-- capture nmatches
 
     return q_est, idmatch, nmatches
 
@@ -447,7 +465,7 @@ def calculate_center_intensity(img, stats, min_star_area, max_star_area):
     coi = np.zeros(shape=(len(stats), 2), dtype=float)
     intensities = np.zeros(shape=(len(stats), 1), dtype=float)
 
-    #TODO: FIXME.  The below list switch is only due to the intensity sum issue detailed below
+    #TODO: FIXME:  the below list switch is only due to the intensity sum issue detailed below
     coi = []
 
     for count, label in enumerate(stats):
@@ -463,11 +481,6 @@ def calculate_center_intensity(img, stats, min_star_area, max_star_area):
         intensities[count, :] = intensity_sum
 
         #TODO: FIXME: intensity sum can sometimes be 0
-
-        #print('-----')
-        #print(intensity)
-        #print(intensity_sum)
-
 
         if intensity_sum > 0: #else is only here due to issue w/ intensity_count == 0
 

@@ -7,6 +7,7 @@ extension, and darkframe to loop through the Tetra database and generate
 inputs for the opencv camera calibration routine
 """
 
+
 ################################
 #LOAD LIBRARIES
 ################################
@@ -38,13 +39,13 @@ verbose = True
 #MAIN CODE
 ################################
 
-# figure out if a database exists for Tetra
+# Determine if a database exists for Tetra
 if isinstance(db_name, str):
     path = (pathlib.Path(__file__).parent / db_name).with_suffix('.npz')
 else:
     path = pathlib.Path(path).with_suffix('.npz')
 
-# if not, create one
+# If not, create one
 if not os.path.exists(path):
     print("\nUnable to find specified database: " + str(path))
     print("    Generating database...")
@@ -52,10 +53,10 @@ if not os.path.exists(path):
     t3.generate_database(max_fov = estimated_full_angle_fov, save_as=db_name)  #this builds a database
     print("    ...complete\n\n")
 
-# init Tetra w/ database
+# Init Tetra w/ database
 t3 = Tetra3(db_name)
 
-# find darkframe
+# Find darkframe, if available
 if darkframe_filename == '':
     print("\nDarkframe file not provided, proceeding without darkframe subtraction.\n")
     darkframe_filename = None
@@ -67,7 +68,7 @@ else:
         darkframe_filename = None
         print("\nUnable to find darkframe, proceeding without darkframe subtraction.\n")
 
-# define variables and start processing
+# Define variables and start processing
 path = pathlib.Path(path_to_images)
 solution_list = []
 AllProjs = np.array([[0,0,0]])
@@ -93,7 +94,7 @@ for impath in image_files:
             darkframe = cv2.imread(darkframe_filename, cv2.IMREAD_GRAYSCALE)
             img = cv2.subtract(img, darkframe)
 
-        start_time = time.time() #reset timer
+        start_time = time.time() # reset timer
 
         solved = t3.solve_from_image(img, fov_estimate=estimated_full_angle_fov)  # Adding e.g. fov_estimate=11.4, fov_max_error=.1 may improve performance
 
@@ -119,7 +120,7 @@ for impath in image_files:
                 v = np.array(tup[1]).transpose()
                 #print(v)
                 vcam = np.dot(RotZ, np.dot(RotY, np.dot(R, v)))
-                #Project Vector onto z = 1 
+                # Project Vector onto z = 1
                 proj = np.array([(vcam[0]/vcam[2]),(vcam[1]/vcam[2]), 0])
                 #print(proj)
                 AllProjs = np.append(AllProjs, [proj], axis = 0)
@@ -134,7 +135,7 @@ for impath in image_files:
         else:
             print('\n    ...FAILED to solve \n\n')
 
-# if some of the images were solved, use the solutions to calibrate the camera
+# If some of the images were solved, use the solutions to calibrate the camera
 if len(solution_list) > 0:
 
     print("\n\nFound ("+str(len(solution_list))+") solutions out of (" + str(num_images)+") images\n")
@@ -160,20 +161,20 @@ if len(solution_list) > 0:
     print("\nTvecs: " + str(tvecs))
     print("")
 
-    # populate dict
+    # Populate dict
     dist_l=dist.tolist()
     newcameramtx_l = mtx.tolist()
-    # in this case, cy is vp and cx is up.
+    # In this case, cy is vp and cx is up.
     cam_cal_dict = {'camera_matrix': newcameramtx_l, 'dist_coefs': dist_l, 'resolution':[image_size[0],image_size[1]], 'camera_model':'Brown','k1':dist_l[0][0],'k2':dist_l[0][1],'k3':dist_l[0][4],'p1':dist_l[0][2],'p2':dist_l[0][3],'fx':newcameramtx_l[0][0],'fy':newcameramtx_l[1][1],'up':newcameramtx_l[0][2],'vp':newcameramtx_l[1][2],'skew':newcameramtx_l[0][1], 'RMS_reproj_err_pix':RMS_reproj_err_pix}
 
-    #save if it's good
+    # Save if it's good
     usr_in = input('\n\n\nIf you are satisfied with the results, provide a file name.  Otherwise, enter "no". [no/file_name]: ')
 
     usr_in=usr_in.lower()
     if usr_in in ['n', 'no']:
         sys.exit()
-    
-    #save
+
+    # Save
     if usr_in == '':
         usr_in = 'generic_cam_params'
     usr_in_split = usr_in.split('.json')
@@ -193,3 +194,5 @@ if len(solution_list) > 0:
 
 
 else: print("\n\n\nNo solutions found (at all).  Exiting unsuccessfully...\n\n\n")
+
+

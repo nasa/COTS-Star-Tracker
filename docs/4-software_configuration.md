@@ -26,11 +26,11 @@ the configuration of this system.
 3. Point the script to the camera parameter file.  Camera parameters are used to more intelligently create the catalog.
 4. Point the script to the directory where images are stored to be used to create the darkframe.
 5. Run the star_catalog_creator.py script.
-    * This can be fairly time consuming on slower computers like the Raspberry Pi 3B+.  It may be advisable to do this step on a faster computer than what projects typically use as the flight computer.
+    * This can be fairly time consuming on slower computers like the Raspberry Pi 3B+.  It may be advisable to do this step on a faster computer than what projects typically use as a flight computer.
 6. Optionally, a darkframe can be created with the tools/create_darkframe.py script.
-    * Update the path_to_images variable in the tools/create_darkframe.py script
-    * The default num_images of 7 is suitable for most applications, but you can change it as required
-    * When run, the script will create a darkframe image named 'autogen_darkframe' in the path_to_images directory
+    * Update the path_to_images variable in the tools/create_darkframe.py script.
+    * The default num_images of 7 is suitable for most applications, but you can change it as required.
+    * When run, the script will create a darkframe image named 'autogen_darkframe' in the path_to_images directory.
 
 
 ## 4.2 Star Tracker Algorithm Setup
@@ -54,7 +54,7 @@ the script(s) in the 'examples' directory before continuing.
             * this defaults to 'True'.
         * n_stars keyword argument (integer): the number of stars that will be used to determine catalog matches (always starting with the brightest)
             * this defaults to 30.  Fewer stars may reduce solve times, but may reduce sky coverage.
-        * isa_thresh keyword argument (float): inner star angle threshold
+        * isa_thresh keyword argument (float): inner star angle threshold for valid matches
             * this defaults to 0.0008, which is equivalent to about 5px.  You may want to provide a smaller number.
         * nmatch keyword argument (integer): minimum number of catalog matches required to estimate attitude
             * this defaults to 6.  It's not recommended to use a lower number as it may result in incorrect attitude estimates.
@@ -75,6 +75,9 @@ the script(s) in the 'examples' directory before continuing.
 4. The star_tracker function will return a quaternion estimate, list of matches, number of matches, x_obs, and the image after manipulation.
     * first return (array): quaternion
         * quaternion is right-handed, scalar last
+		* NOTE: in the case of a solution failure, the quaternion output is populated with information that is intended to be used to diagnose the solution failure.
+		  In this case, the output IS NOT supposed to be used as an attitude.  The troubleshooting information is "obvious" as the quaternion is no longer a unit quaternion.
+		  For more information, see Section 3.4 in this guide.
     * second return (array): idmatch
         * array of matches from the triangle_isa_id function
     * third return (integer): nmatches
@@ -91,7 +94,7 @@ Example call:
             nmatch=7, n_stars=25, graphics=True, verbose=True)
 
 
-## 4.2 Troubleshooting
+## 4.3 Troubleshooting
 This step described generic troubleshooting steps to help overcome errors in configuring the software and getting it to work for the first time.
 
 This software has been designed with the intention to compensate for bad inputs and provide detailed errors when it fails to do so.  That being said, the software
@@ -102,8 +105,8 @@ is still very immature and there are many exceptions that have yet to be caught.
     * Warnings don't necessarily have to be acted on, but the user should be aware when they are happening and what their impact is
 * Errors: these are situations where the software can not continue and will exit.  This requires a user to make a change to the software inputs to allow the software to function.
     * An error should be displayed in the terminal output in this way: "ERROR [star_tracker.function_name]: description of the error"
-	
-For further insight into the performance, the main.star_tracker function has a graphics and a verbose keyword argument.
+
+For further insight into the performance, the main.star_tracker function has a 'graphics' and a 'verbose' keyword argument.
 * As briefly described above, setting either to True will enable additional output.
 * The graphics will show several screens, including:
     1. The binary threshold image
@@ -117,4 +120,50 @@ For further insight into the performance, the main.star_tracker function has a g
     4. Algorithm final results overlaid on the image, including matched candidates (green/blue squares), matched catalog stars (green diamonds), invalid candidates (red triangles), and unmatched catalog stars (red circles)
         * If there are many overlaid squares and diamonds and few overlaid circles and triangles, this suggests the algorithm is functioning well
         * If there are few overlaid squares and diamonds and many overlaid circles and triangles, this suggests that a better camera calibration may be required
+
+### 4.3.1 Failure Output
+
+The star tracker quaternion output, in the case of a solution failure, will contain troubleshooting information instead of an attitude quaternion.  This information is intended to be easily differentiable from
+a unit quaternion to minimize confusion.  Many navigation systems also employ unit checks on quaternion inputs, so this output is designed with that understanding of many navigation systems to leverage their
+existing rejection logic while also minimizing the output complexity of the star tracker algorithm.
+
+The primary indicator of the type of solve failure experienced by the algorithm is captured in the last output field of the quaternion, which is typically occupied by the scalar.  These outputs can be:
+    * 400: an error code specifying a failure to find a sufficient number of centroids in the frame
+	* 401: an error code specifying an insufficient number of matches vs the input nmatch threshold (fewer x_obs than nmatch)
+    * 402: an error code specifying an insufficient number of matches vs the input nmatch threshold (end of the nmatch loop without hitting nmatches)
+    * 408: an error code specifying the watchdog timeout was reached and solving halted
+
+Each error code then provides different information to maximize the relevance of the information specific to the failure type.
+
+#### 4.3.1.1 Error code 400
+
+Error code 400 contains the following information:
+* q_est[0]: average pixel value of the image
+* q_est[1]: nmatches variable at time of exit (number of matches found at that point)
+* q_est[2]: number of centroids found in image
+* q_est[3]: 400 (the error descriptor)
+
+#### 4.3.1.2 Error code 401
+
+Error code 401 contains the following information:
+* q_est[0]: n_obs # error details-- capture number of candidates
+* q_est[1]: nmatches variable at time of exit (number of matches found at that point)
+* q_est[2]: number of centroids used for catalog matching
+* q_est[3]: 401 (the error descriptor)
+
+#### 4.3.1.3 Error code 402
+	
+Error code 402 contains the following information:
+* q_est[0]: unused, set to 0
+* q_est[1]: nmatches variable at time of exit (number of matches found at that point)
+* q_est[2]: number of centroids used for catalog matching
+* q_est[3]: 402 (the error descriptor)
+
+#### 4.3.1.4 Error code 408
+
+Error code 408 contains the following information:
+* q_est[0]: unused, set to 0
+* q_est[1]: unused, set to 0
+* q_est[2]: number of centroids used for catalog matching
+* q_est[3]: 408 (the error descriptor)
 

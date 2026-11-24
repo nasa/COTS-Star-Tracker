@@ -50,17 +50,18 @@ This information is stored as JSON files with the below format:
     1936,
     1216
   ],
-  "CameraModel": "Brown",
-  "k1": -0.381661276964259,
-  "k2": 0.4990315571567245,
-  "k3": -0.9249236176696716,
-  "p1": 0.004867363480130749,
-  "p2": 0.006705504855027461,
-  "fx": 1901.7890625,
-  "fy": 1900.397216796875,
-  "up": 908.7976001542993,
-  "vp": 594.3062648404884,
-  "skew": 0.0
+  "camera_model": "Brown",
+  "k1": 0.30368531303979257,
+  "k2": 12.740200108492933,
+  "k3": -460.0045562585374,
+  "p1": 0.002101279672651536,
+  "p2": 0.02258079308578,
+  "fx": 6261.771848973779,
+  "fy": 6261.026671824068,
+  "up": 967.5,
+  "vp": 607.5,
+  "skew": 0.0,
+  "RMS_reproj_err_pix": 0.89651411669187
 }
 
 
@@ -72,44 +73,52 @@ charuco_cam_cal.py script for camera calibration.
 To use the charuco_cam_cal.py script:
 1. Acquire a suitable ChAruCo target.
     * Here's an example from OpenCV: https://docs.opencv.org/3.4/charucoboard.png
-    * Ensure your target is flat (without wrinkles or warps)-- a piece of paper by itself is likely insufficient, but it may suffice if taped to a rigid surface like a desk or clip board.
-2. Capture a series of images (at least 10) where the entire target is visible in each picture.  Move the target in between each capture so the set contains a variety of orientations and distances from the camera.  Also ensure that there are no areas in the field of view that don't contain a part of the target in at least one image.    * Ensure you can discern the target in each photo and capture enough photos to ensure there are stars across the entire field of view
-    * Ensure your target is flat (without wrinkles or warps)-- a piece of paper by itself is likely insufficient, but it may suffice if taped to a rigid surface like a desk or clip board.
-3. Move the images to /py_src/tools/camera_calibration/charuco and update charuco_cam_cal.py so the 'USER INPUT' section reflects your target's configuration
-4. Run charuco_cam_cal.py: python3 charuco_cam_cal.py
+    * Ensure the target is flat (without wrinkles or warping)-- a piece of paper by itself is likely insufficient, but it may suffice if taped to a rigid surface like a table or clip board.
+    * Do not use a checkerboard target with this script-- be sure to use a ChAruCo target.
+2. Ensure the camera is set in its final/flight configuration (focus, aperture, etc.).
+3. Capture a set of images (at least 10) where the entire target is visible in each picture.  Move the target in between each capture so the set contains a variety of orientations and distances from the camera.
+    * Ensure you can clearly see the target and its patterns in each image.
+    * Ensure that each area of the field of view of the camera has at least part of the target in it in at least one image.
+4. Update the 'USER INPUT' section of charuco_cam_cal.py
+    * Point the script to the location of the aforementioned images and optionally including a darkframe.
+    * By default, the script will attempt to process all images in the same directory as it with a .jpg extension.
+    * Ensure the details about the target used match the script inputs.
+5. Run charuco_cam_cal.py: python3 charuco_cam_cal.py
     * Note that this does not have to be done on the target computer and can be done "offline" on a faster one.
-    * By default, the charuco_cam_cal.py script will attempt to process all images in the same directory as it with a .jpg extension
-    * Running this script can be very time consuming on certain lower power computer systems (like a Raspberry Pi 3B+)
-5. After completing, the script will either output that it has failed or that is has succeeded and some information about the calibration result, including the RMS error.
+    * Running this script can be very time consuming on certain lower power computer systems (like a Raspberry Pi 3B+).
+6. After completing, the script will either output that it has failed or that is has succeeded and some information about the calibration result, including the RMS error.
     * If the script fails, ensure the ChArUco targets are clearly visible in the images (good focus, exposure, etc.).
-6. If the user does not indicate the cal was a failure, the script will then prompt the user for a name for the camera cal file.
+7. If the user does not indicate the cal was a failure, the script will then prompt the user for a name for the camera cal file.
     * If no name is selected, it will default to generic_cam_params.json
-    * The camera cal file will be located in data/cam_config within the star_tracker module directory
+    * The camera cal file will be located in data/cam_config within the star_tracker module directory.
 
 
 ### 3.1.1.b Tetra-based Calibration
-The run_tetra_cal.py script in the py_src/tools/camera_calibration/tetra directory generates an appropriately formatted JSON file when provided with images of a starfield.
+The run_tetra_cal.py script in the py_src/tools/camera_calibration/tetra directory generates an appropriately formatted JSON file when provided with images of star fields.
 Using the run_tetra_cal.py script is not required, but an appropriately formatted camera configuration JSON file is required.  If a ChArUco target is unavailable, this calibration
 method may be the next best option.
 
 To use the run_tetra_cal.py script:
-1. Capture images of stars with your camera set in its final configuration (focus, aperture, etc.).
-    * Ensure you can discern more than 5 stars in each photo and capture enough photos to ensure there are stars across the entire field of view
-1. Update the 'USER INPUT' section of run_tetra_cal.py
-    * Point the script to the location of the aforementioned images, optionally including a darkframe.
-    * If you know your camera's field of view, update that as well.  Otherwise, leave the default value
-2. Capture a series of images (at least 10) where you can discern at least 5 stars in each picture.
+1. Ensure the camera is set in its final/flight configuration (focus, aperture, etc.).
+2. Capture a set of images (at least 10) of stars with your camera.
+    * Ensure you can discern more than 5 stars in each image.
+    * Ensure that each area of the field of view of the camera has stars in it in at least one image.
+3. Update the 'USER INPUT' section of run_tetra_cal.py
+    * Point the script to the location of the aforementioned images and optionally including a darkframe.
+    * By default, the script will attempt to process all images in the same directory as it with a .jpg extension.
+    * If you know your camera's field of view, update that as well.  Otherwise, leave the default value.
+4. Capture a series of images (at least 10) where you can discern at least 5 stars in each picture.
     * Move the camera in between each capture so the resulting image set contains a variety of constellation orientations.
     * Ensure that there are no areas in the field of view that don't contain stars in at least one image.
     * This calibration method may fail on images where many stars are clearly visible.  For that reason, be sure to take 3-4x more images than what you need (e.g. 3-4x more than 10) to ensure you have at least 10 images that Tetra has solved for the calibration.
-3. Run run_tetra_cal.py: python3 run_tetra_cal.py
+5. Run run_tetra_cal.py: python3 run_tetra_cal.py
     * Note that this does not have to be done on the target computer and can be done "offline" on a faster one.
-4. After completing, the script will either output that it has failed or that is has succeeded and some information about the calibration result, including the RMS error.
-5. If the script fails, fails to solve more than 50% of the input images or if the RMS error is more than 1 pixel, take another set of adjust the settings (like FoV) in the run_tetra_cal.py file.
+6. After completing, the script will either output that it has failed or that is has succeeded and some information about the calibration result, including the RMS error.
+7. If the script fails, fails to solve more than 50% of the input images or if the RMS error is more than 1 pixel, take another set or adjust the settings (like FoV) in the run_tetra_cal.py file.
     * If you previously captured many more images than the minimum you need, then you may remove the images that failed to solve from the set and re-solve (assuming you have at least 10 that did solve).
-6. If the user does not indicate the cal was a failure, the script will then prompt the user for a name for the camera cal file.
+8. If the user does not indicate the cal was a failure, the script will then prompt the user for a name for the camera cal file.
     * If no name is selected, it will default to generic_cam_params.json
-    * The camera cal file will be located in data/cam_config within the star_tracker module directory
+    * The camera cal file will be located in data/cam_config within the star_tracker module directory.
 
 
 ### 3.1.1.c Checkerboard Calibration
@@ -119,21 +128,26 @@ can vary significantly, so it's only recommended for users familiar with the met
 
 To use the checkerboard_cam_cal.py script:
 1. Download and print a suitable checkerboard pattern.
-    * the OpenCV one works well: https://docs.opencv.org/master/pattern.png
-    * be sure your target is flat (without wrinkles or warps)-- a piece of paper by itself is likely insufficient, but it may suffice if taped to a rigid surface like a desk or clip board.
-2. Capture a series of images (at least 10) where the entire target is visible in each picture.  Move the target in between each capture so the set contains a variety of orientations and distances from the camera.  Also ensure that there are no areas in the field of view that don't contain a part of the target in at least one image.
-3. Move the images to /py_src/tools/camera_calibration/checkerboard and run checkerboard_cam_cal.py: python3 checkerboard_cam_cal.py
+    * Here's an example from OpenCV: https://docs.opencv.org/master/pattern.png
+    * Ensure the target is flat (without wrinkles or warping)-- a piece of paper by itself is likely insufficient, but it may suffice if taped to a rigid surface like a table or clip board.
+2. Ensure the camera is set in its final/flight configuration (focus, aperture, etc.).
+3. Capture a set of images (at least 10) where the entire target is visible in each picture.  Move the target in between each capture so the set contains a variety of orientations and distances from the camera.
+    * Ensure you can clearly see the target and its patterns in each image.
+    * Ensure that each area of the field of view of the camera has at least part of the target in it in at least one image.
+4. Update the 'USER INPUT' section of checkerboard_cam_cal.py
+    * Point the script to the location of the aforementioned images and optionally including a darkframe.
+    * By default, the script will attempt to process all images in the same directory as it with a .jpg extension.
+    * Ensure the details about the target used match the script inputs.
+5. Run checkerboard_cam_cal.py: python3 checkerboard_cam_cal.py
     * Note that this does not have to be done on the target computer and can be done "offline" on a faster one.
-    * By default, the checkerboard_cam_cal.py script will attempt to process all images in the same directory as it with a .jpg extension
-    * If you use a different target than the OpenCV one linked above, you may need to change the number of rows and columns in the script
-    * Running this script can be very time consuming on certain lower power computer systems (like a Raspberry Pi 3B+)
-4. Once complete, the script will undistort an image in the set and save two versions: cropped (calibresult_cropped.png) and uncropped (calibresult.png) in the same directory as the script.
+    * Running this script can be very time consuming on certain lower power computer systems (like a Raspberry Pi 3B+).
+6. Once complete, the script will undistort an image in the set and save two versions: cropped (calibresult_cropped.png) and uncropped (calibresult.png) in the same directory as the script.
     * The script will also print some information about the calibration result, including the RMS error.
-5. The script will then prompt the user to verify the cal was successful.
+7. The script will then prompt the user to verify the cal was successful.
     * a visual spot check of calibresult_cropped.png and calibresult.png and verifying that the RMS error is less than 1 pixel is considered sufficient to judge if the cal was a success.  The original image file name will also be printed in the terminal.  If the checkerboard is more square, it's a success.  If it's just as bowed as the original or worse, it's a failure.
-6. If the user does not indicate the cal was a failure, the script will then prompt the user for a name for the camera cal file.
+8. If the user does not indicate the cal was a failure, the script will then prompt the user for a name for the camera cal file.
     * If no name is selected, it will default to generic_cam_params.json
-    * The camera cal file will be located in data/cam_config within the star_tracker module directory
+    * The camera cal file will be located in data/cam_config within the star_tracker module directory.
 
 
 ## 3.2 Camera Configuration
@@ -146,8 +160,6 @@ will not result in sufficient imagery of star fields (at least, when taken from 
 It's strongly encouraged for users to combine knowledge of their spacecraft ConOps and a clear night within minimal light pollution to appropriately
 set the gain and exposure levels for their camera.  Note that longer exposure times will limit the attitude rates at which the algorithm can successfully
 identify stars and estimate attitude.  It's forward work to determine these limits in certain configurations.
-
-
 
 
 

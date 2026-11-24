@@ -206,7 +206,7 @@ def find_candidate_stars(img, low_thresh=None, hi_thresh=None,
         #cv2.destroyAllWindows()
         fig = plt.figure()
         plt.imshow(im_binary)
-        plt.title("Binary image")
+        plt.title("Resulting image after binary thresholding")
         fig.tight_layout()
         plt.show()
 

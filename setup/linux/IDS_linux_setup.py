@@ -23,7 +23,7 @@ os.system('sudo apt-get --yes install python3-qt4 python3-qt4-doc')
 
 print("To install the IDS drivers, you must:")
 print("  * download the right driver from: https://en.ids-imaging.com/download-ueye-emb-hardfloat.html ")
-print("       (sadly, you have to create an account)")
+print("       (note that you have to create an account)")
 print("  * extract the tar file")
 print("  * run the appropriate .run file")
 

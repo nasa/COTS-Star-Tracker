@@ -493,7 +493,7 @@ class Tetra3():
         for star_id in pattern_stars:
             vector = star_table[star_id, 2:5]
             # find which partition the star occupies in the hash table
-            hash_code = tuple(((vector+1)*temp_bins).astype(np.int))
+            hash_code = tuple(((vector+1)*temp_bins).astype(np.int64))
             # if the partition is empty, create a new list to hold the star
             # if the partition already contains stars, add the star to the list
             temp_coarse_sky_map[hash_code] = temp_coarse_sky_map.pop(hash_code, []) + [star_id]
@@ -504,8 +504,8 @@ class Tetra3():
             nearby_star_ids = []
             # given error of at most radius in each dimension, compute the space of hash codes
             hash_code_space = [range(max(low, 0), min(high+1, 2*temp_bins)) for (low, high)
-                               in zip(((vector + 1 - radius) * temp_bins).astype(np.int),
-                                      ((vector + 1 + radius) * temp_bins).astype(np.int))]
+                               in zip(((vector + 1 - radius) * temp_bins).astype(np.int64),
+                                      ((vector + 1 + radius) * temp_bins).astype(np.int64))]
             # iterate over hash code space
             for hash_code in itertools.product(*hash_code_space):
                 # iterate over the stars in the given partition, adding them to
@@ -523,7 +523,7 @@ class Tetra3():
         for pattern[0] in pattern_stars:  # star_ids_filtered:
             vector = star_table[pattern[0], 2:5]
             # find which partition the star occupies in the sky hash table
-            hash_code = tuple(((vector+1)*temp_bins).astype(np.int))
+            hash_code = tuple(((vector+1)*temp_bins).astype(np.int64))
             # remove the star from the sky hash table
             temp_coarse_sky_map[hash_code].remove(pattern[0])
             # iterate over all possible patterns containing the removed star
@@ -551,7 +551,7 @@ class Tetra3():
             # divide the edges by the largest edge to create dimensionless ratios
             edge_ratios = edges[:-1] / largest_edge
             # convert edge ratio float to hash code by binning
-            hash_code = tuple((edge_ratios * pattern_bins).astype(np.int))
+            hash_code = tuple((edge_ratios * pattern_bins).astype(np.int64))
             hash_index = _key_to_index(hash_code, pattern_bins, pattern_catalog.shape[0])
             # use quadratic probing to find an open space in the pattern catalog to insert
             for index in ((hash_index + offset ** 2) % pattern_catalog.shape[0]
@@ -682,8 +682,8 @@ class Tetra3():
             pattern_edge_ratios = pattern_edges[:-1] / pattern_largest_edge
             # Pssible hash codes to look up
             hash_code_space = [range(max(low, 0), min(high+1, p_bins)) for (low, high)
-                               in zip(((pattern_edge_ratios - p_max_err) * p_bins).astype(np.int),
-                                      ((pattern_edge_ratios + p_max_err) * p_bins).astype(np.int))]
+                               in zip(((pattern_edge_ratios - p_max_err) * p_bins).astype(np.int64),
+                                      ((pattern_edge_ratios + p_max_err) * p_bins).astype(np.int64))]
             # iterate over hash code space, only looking up non-duplicate codes
             for hash_code in set(tuple(sorted(code))
                                  for code in itertools.product(*hash_code_space)):

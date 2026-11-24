@@ -12,6 +12,7 @@ This program is intended to:
 
 ''' 
 
+
 ################################
 #LOAD LIBRARIES
 ################################
@@ -39,7 +40,8 @@ checker_square_size = 4.5*0.0254 #m
 ################################
 #MAIN CODE
 ################################
-# termination criteria
+
+# Termination criteria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 # Defining the dimensions of checkerboard
@@ -72,13 +74,13 @@ print(images)
 if len(images) == 0:
     print("""\nPlease ensure calibration images are present in the current
 working directory and also have the following filetype(case sensitive):""")
-    print("\n"+img_extension)
-    print("\nExiting...")
+    print("\n     "+img_extension)
+    print("\nExiting...\n\n")
     sys.exit()
 
 elif len(images) < 10:
     print("""\nIt's recommended to use at least 10 images. Please 
-ensure your lower image count is intentional, otherwise it is
+ensure your lower image count is intentional, otherwise it's
 recommended to add additional calibration images for improved results.""")
     usr_in = input("\nPress enter to continue.")
 
@@ -163,20 +165,20 @@ if(charuco_img_points):
 
     image_size = (img.shape[1],img.shape[0]) # tuple required, input args flipped
 
-    #populate dict
+    # populate dict
     dist_l=dist.tolist()
     newcameramtx_l = mtx.tolist()
-    #in this case, cy is vp and cx is up.
+    # in this case, cy is vp and cx is up.
     cam_cal_dict = {'camera_matrix': newcameramtx_l, 'dist_coefs': dist_l, 'resolution':[image_size[0],image_size[1]], 'camera_model':'Brown','k1':dist_l[0][0],'k2':dist_l[0][1],'k3':dist_l[0][4],'p1':dist_l[0][2],'p2':dist_l[0][3],'fx':newcameramtx_l[0][0],'fy':newcameramtx_l[1][1],'up':newcameramtx_l[0][2],'vp':newcameramtx_l[1][2],'skew':newcameramtx_l[0][1], 'RMS_reproj_err_pix':RMS_reproj_err_pix}
 
-    #save if it's good
+    # save if it's good
     usr_in = input('\n\n\nIf you are satisfied with the results, provide a file name.  Otherwise, enter "no". [no/file_name]: ')
 
     usr_in=usr_in.lower()
     if usr_in in ['n', 'no']:
         sys.exit()
 
-    #save
+    # save
     if usr_in == '':
         usr_in = 'generic_cam_params'
     usr_in_split = usr_in.split('.json')
@@ -203,3 +205,4 @@ else:
 
 if show_plots:
     cv2.destroyAllWindows()
+

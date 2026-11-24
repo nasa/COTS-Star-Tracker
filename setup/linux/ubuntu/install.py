@@ -6,9 +6,10 @@ install.py
 
 This program is intended to install all
 prerequisite packages for the star tracker
-software on a single board computer running Ubuntu
+software on a computer running Ubuntu
 
 '''
+
 
 ################################
 #LOAD LIBRARIES
@@ -17,52 +18,53 @@ import os
 import sys
 import time
 
+
 ################################
 #MAIN CODE
 ################################
-#ensure user has set locale and time
-usr_in = input('Before running this script, you should set the system locale and time.  Have you done this? [Y/N]: ')
+
+# Ensure locale and time have been set
+usr_in = input("\nBefore running this script, the system locale and time should be set.  Has this been done? [Y/N]: ")
 usr_in=str(usr_in)
 usr_in=usr_in.lower()
 if usr_in != 'y' and usr_in != 'yes' and usr_in != 'heck yeah':
-    print('\n\nset the system locale and time, restart the system, and then try again')
+    print("\n\nPlease set the system locale and time, restart the system, and then try again.")
     sys.exit()
 
+# Ensure system is up to date
+usr_in = input("\nBefore running this script, the system/package managers should be updated to ensure it has access to the latest/best package repositories.  Has this been done? [Y/N]: ")
+usr_in=str(usr_in)
+usr_in=usr_in.lower()
+if usr_in != 'y' and usr_in != 'yes' and usr_in != 'heck yeah':
+    print("\n\nPlease update the system/package managers, and then try again.")
+    sys.exit()
 
-# install/update system stuff
-os.system('sudo apt-get --yes update')
-os.system('sudo apt-get --yes upgrade')
-os.system('sudo apt-get --yes dist-upgrade')
+# Install/update system packages
+print("\n\n Installing system packages (this requires an internet connection)...\n")
 os.system('sudo apt-get --yes install gfortran')
-os.system('sudo apt-get --yes install libblas-dev') #scipy req
+os.system('sudo apt-get --yes install libblas-dev') # scipy req
+os.system('sudo apt-get --yes install python3-pip')
 
-# install/update python stuff
-os.system('sudo apt-get --yes install python-tk')
-os.system('sudo apt-get --yes install python3-lxml')
-os.system('sudo apt-get --yes install libopencv-dev python3-opencv')
-os.system('sudo apt-get --yes install python3-pip') #how does this not have pip??
-os.system('sudo pip3 install pip --upgrade')
-os.system('sudo pip3 install psutil')
-os.system('sudo pip3 install imageio') #required for catalog creation
-os.system('sudo pip3 install astropy') #required for catalog creation
-os.system('sudo pip3 install pandas') #required for catalog creation
-os.system('sudo pip3 install statistics')
-os.system('sudo pip3 install astroquery') #required for astrometry verification
+# Define paths
+ubuntu_install_dir = os.getcwd()
+linux_dir = os.path.dirname(ubuntu_install_dir)
+setup_dir = os.path.dirname(linux_dir)
+requirements_full_filename = os.path.join(setup_dir,"requirements.txt")
+top_dir = os.path.dirname(setup_dir)
+star_tracker_src_dir = os.path.join(top_dir, "py_src", "star_tracker")
 
-#install module
-home = os.getcwd()
-os.chdir('..')
-os.chdir('..')
-os.chdir('..')
-os.chdir('py_src/star_tracker')
-os.system('sudo pip3 install .')
-os.chdir(home)
+# Install Python packages
+print("\n\n Installing Python packages (this requires an internet connection)...\n")
+os.system("pip3 --no-cache-dir install -r "+requirements_full_filename) # --no-cache-dir helps avoid low memory errors
+print("\n\n ...complete.\n\n")
 
-#must install freetype2 dev pkg first??
-os.system('sudo apt-get --yes install libfreetype6-dev pkg-config')
-os.system('sudo pip3 --no-cache-dir install matplotlib') #otherwise you get a memory error
-os.system('sudo pip3 install --upgrade setuptools')
-os.system('sudo pip3 --no-cache-dir install scipy') #same
+# Install star tracker package
+print("\n\n Installing Star Tracker package...\n")
+os.chdir(star_tracker_src_dir)
+os.system('pip3 install .')
+os.chdir(ubuntu_install_dir)
+print("\n\n ...complete.\n\n")
 
-print("\n\nInstallation Complete.  Please restart the computer!")
-print("NOTE: no camera interfaces were installed during this process.  Other scripts/software may have to be run to install camera software interfaces and drivers.")
+
+print("Installation complete (note: no camera interfaces were installed during this process).  The computer may need to be restarted.\n\n")
+

@@ -174,7 +174,7 @@ print("\n     "+str(len(common_names))+" common solutions identified between the
 print("\n...processing complete!")
 
 # save output
-the_data = {'image_name':common_names,"ST_qs":q1_s,"ST_qv0":q1_v0,"ST_qv1":q1_v1,"ST_qv2":q1_v2,"ST_RA_deg":st_ra,"ST_Dev_deg":st_dec,"Astro_RA_deg":astro_ra,"Astro_Dec_deg":astro_dec,"delta_angle_deg":theta_err}
+the_data = {'image_name':common_names,"ST_qs":q1_s,"ST_qv0":q1_v0,"ST_qv1":q1_v1,"ST_qv2":q1_v2,"ST_RA_deg":st_ra,"ST_Dec_deg":st_dec,"Astro_RA_deg":astro_ra,"Astro_Dec_deg":astro_dec,"delta_angle_deg":theta_err}
 now = str(datetime.now())
 now = now.split('.')
 now = now[0]

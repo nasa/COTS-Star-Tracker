@@ -8,6 +8,7 @@ This script is intended to process images through astrometry.net
 in order to provide an independent attitude measurement
 '''
 
+
 ################################
 #LOAD LIBRARIES
 ################################
@@ -21,34 +22,36 @@ from astroquery.astrometry_net import AstrometryNet
 ast = AstrometryNet()
 print("\n\n    !!!  Be sure to input your astrometry.net API key in the astrometry_process.py file  !!!!\n\n")
 
+
 ################################
 #USER INPUT
 ################################
-ast.api_key = 'YOUR_KEY_GOES_HERE' #astrometry.net API key
+ast.api_key = 'YOUR_KEY_GOES_HERE' # astrometry.net API key
 target_dir = "your/full/file/path/goes/here" #full path to the directory where the images to be processed are
-solver_timeout = 3600 #seconds
-crash_recovery = False #set this flag to True if the tool failed mid-run to resume where you left off
+solver_timeout = 3600 # seconds
+crash_recovery = False # set this flag to True if the tool failed mid-run to resume where you left off
+
 
 ################################
 #MAIN CODE
 ################################
-#get list of images
+# get list of images
 the_files = os.listdir(target_dir)
 image_list = []
 for file in the_files:
     if (".png" in file) or (".jpg" in file) or (".jpeg" in file) or (".tiff" in file):
         image_list += [os.path.join(target_dir,file)]
 
-iterator_image_list = image_list.copy() #required to unlink
+iterator_image_list = image_list.copy() # required to unlink
 
-#define vars
+# define vars
 n = 0
 ra = []
 dec = []
 solve_time = []
 processed_image_list = []
 
-#crash recovery
+# crash recovery
 if crash_recovery:
     print("resuming from previous failed run")
     current_dir = os.getcwd()
@@ -108,7 +111,7 @@ for image_name in iterator_image_list:
         ra += [999]
         dec += [999]
 
-    #assemble dict
+    # assemble dict
     the_data = {"image_name":processed_image_list,"ra":ra,"dec":dec,"solve_time":solve_time}
     now = str(datetime.now())
     now = now.split('.')
@@ -116,14 +119,14 @@ for image_name in iterator_image_list:
     now = now.replace(' ','_')
     now = now.replace(':','-')
 
-    #write stuff
+    # write data
     keys=sorted(the_data.keys())
     with open(os.path.join(os.getcwd(),  now+'_astrometry_output.csv'),'w', newline='') as csv_file:
         writer=csv.writer(csv_file)
         writer.writerow(keys)
         writer.writerows(zip(*[the_data[key] for  key in keys]))
 
-#assemble dict
+# assemble dict
 the_data = {"image_name":processed_image_list,"ra":ra,"dec":dec,"solve_time":solve_time}
 now = str(datetime.now())
 now = now.split('.')
@@ -131,7 +134,7 @@ now = now[0]
 now = now.replace(' ','_')
 now = now.replace(':','-')
 
-#write stuff
+# write data
 keys=sorted(the_data.keys())
 with open(os.path.join(os.getcwd(),  now+'_astrometry_output_FINAL.csv'),'w', newline='') as csv_file:
     writer=csv.writer(csv_file)

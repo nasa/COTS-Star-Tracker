@@ -30,15 +30,15 @@ if usr_in != 'y' and usr_in != 'yes' and usr_in != 'heck yeah':
 
 
 # install/update system stuff
-os.system('sudo apt-get --yes update')
-os.system('sudo apt-get --yes upgrade')
+#os.system('sudo apt-get --yes update')
+#os.system('sudo apt-get --yes upgrade')
 #os.system('sudo rpi-update')  #maybe people shouldn't do this unless things are really broke anyway
 os.system('sudo apt-get --yes install gfortran')
 os.system('sudo apt-get --yes install libatlas-base-dev')
 os.system('sudo apt-get --yes install libopenblas-dev')
 
 # install/update python stuff
-os.system('sudo apt-get --yes install python3-lxml')
+#os.system('sudo apt-get --yes install python3-lxml') #unclear if this is used
 os.system('sudo apt-get --yes install libopencv-dev python3-opencv')
 os.system('sudo pip3 install pip --upgrade')
 os.system('sudo pip3 install psutil')
@@ -48,7 +48,7 @@ os.system('sudo pip3 install pandas') #required for catalog creation
 os.system('sudo pip3 install statistics')
 os.system('sudo pip3 install astroquery') #required for astrometry verification
 
-#install module
+# install star tracker package
 home = os.getcwd()
 os.chdir('..')
 os.chdir('..')

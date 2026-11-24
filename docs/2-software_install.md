@@ -24,15 +24,15 @@ interface code is included for Ximea, IDS, and Raspberry Pi cameras in the /exam
 ## 2.2 COTS Star Tracker Install
 This step installs the star tracker software onto the target computer.
 
-1. Copy the COTS Star Tracker code to the target computer
-    * This can either be a direct clone or a standard copy operation
-2. Connect the target computer to the internet
-    * The install scripts assume the system is connected to the internet, although the file updates can be done offline with additional effort on the user's part
-3. Run the appropriate installer script
+1. Copy the COTS Star Tracker code to the target computer.
+    * This can either be a direct clone or a standard copy operation.
+2. Connect the target computer to the internet.
+    * The install scripts assume the system is connected to the internet, although the file updates can be done offline with additional effort on the user's part.
+3. Run the appropriate installer script.
     * For Ubuntu operating systems, use the setup/linux/ubuntu/install.py script.  Be sure to run it as sudo:  sudo python3 install.py
     * For Raspbian operating systems, use the setup/linux/raspbian/install.py script.  Be sure to run it as sudo: sudo python3 install.py
     * For Windows operating systems (which are intended to be used as troubleshooting/development only), use the setup/windows/install.py script
-4. Restart the target computer
+4. Restart the target computer.
 
 At this point, all dependencies should be installed and the star tracker code should be able to be called as a Python 3 module.
 

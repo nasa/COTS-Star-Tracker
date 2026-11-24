@@ -38,9 +38,9 @@ It's hoped that users will be able to quickly and cheaply add high accuracy atti
 ## High-Level Functionality
 
 The code functions as outlined below:
-1. images taken of a known checkerboard calibration target or starfield images combined with a 3rd party tool are used to computer camera and lens parameters
+1. images taken of a known checkerboard calibration target or star field images combined with a 3rd party tool are used to computer camera and lens parameters
 2. camera parameters are used (along with user input) to create a reference catalog from the Hipparcos star database
-3. based on user-input parameters, pictures are processed to identify star centroids
+3. based on user-input parameters, images are processed to identify star centroids
 4. based on user-input parameters, the star centroids are matched to the reference catalog
 5. if a suitable match is found, a quaternion representing the attitude of the camera boresight is returned
 
@@ -56,9 +56,16 @@ capability and fix bugs and then submit merge/pull requests to have their improv
 
 * v1.0: initial release
 * v1.1: improved docs, bug fixes, new camera calibration method
+* v1.2: improved docs, bug fixes, addition of error codes
 
 
 ## Related NASA Resources
+
+### Additional Information and Flight Information
+
+* Initial publication of COTS Star Tracker System: https://ntrs.nasa.gov/citations/20200001376
+* Flown on R5 Spacecraft 2 (R5-S2) and R5 Spacecraft 4 (R5-S4): https://digitalcommons.usu.edu/smallsat/2025/RA-S4-2025/1/
+* Flown on R5 Spacecraft 9 (R5-S9) and R5 Spacecraft 10 (R5-S10): https://digitalcommons.usu.edu/smallsat/2026/all2026/9/
 
 ### GIANT
 
@@ -71,10 +78,6 @@ For other image-based navigation needs we encourage you to check out our partner
 The Orion emergency return system utilizing optical navigation was demonstrated on Artemis I.
 A key component is this software, which processes the images and produces navigation measurements. 
 The software is an application within the Core Flight Software of the Orion camera controller module and may be requested here: https://software.nasa.gov/software/MSC-26456-1
-
-
-
-
 
 
 

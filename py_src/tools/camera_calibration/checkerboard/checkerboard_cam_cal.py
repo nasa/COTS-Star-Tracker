@@ -14,6 +14,7 @@ This program is intended to:
 
 '''
 
+
 ################################
 #LOAD LIBRARIES
 ################################
@@ -25,6 +26,7 @@ import time
 import json
 import numpy as np
 
+
 ################################
 #USER INPUT
 ################################
@@ -32,13 +34,15 @@ number_of_target_columns = 9 #9
 number_of_target_rows = 6 #6
 img_extension = '.jpg'
 
+
 ################################
 #MAIN CODE
 ################################
-# termination criteria
+
+# Termination criteria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
-# prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
+# Prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
 objp = np.zeros((number_of_target_rows*number_of_target_columns,3), np.float32)
 objp[:,:2] = np.mgrid[0:number_of_target_columns,0:number_of_target_rows].T.reshape(-1,2)
 
@@ -128,7 +132,7 @@ print("\nTvecs: " + str(tvecs))
 print("")
     
 
-# undistort and remap to verify
+# Undistort and remap to verify
 print("\n\n"+str(images[0]) + " now being undistorted to demonstrate calibration.")
 img = cv2.imread(images[0])
 
@@ -159,14 +163,14 @@ newcameramtx_l = newcameramtx.tolist()
 # in this case, cy is vp and cx is up.
 cam_cal_dict = {'camera_matrix': newcameramtx_l, 'dist_coefs': dist_l, 'resolution':[image_size[0],image_size[1]], 'camera_model':'Brown','k1':dist_l[0][0],'k2':dist_l[0][1],'k3':dist_l[0][4],'p1':dist_l[0][2],'p2':dist_l[0][3],'fx':newcameramtx_l[0][0],'fy':newcameramtx_l[1][1],'up':newcameramtx_l[0][2],'vp':newcameramtx_l[1][2],'skew':newcameramtx_l[0][1], 'RMS_reproj_err_pix':RMS_reproj_err_pix}
 
-#save if it's good
+# save if it's good
 usr_in = input('\n\n\nIf you are satisfied with the results, provide a file name.  Otherwise, enter "no". [no/file_name]: ')
 
 usr_in=usr_in.lower()
 if usr_in in ['n', 'no']:
     sys.exit()
     
-#save
+# save
 if usr_in == '':
     usr_in = 'generic_cam_params'
 usr_in_split = usr_in.split('.json')
@@ -183,8 +187,6 @@ with open(full_cam_file_path, 'w') as fp:
 
 
 print("\n\nCamera parameter file saved to: " + str(full_cam_file_path) +"\n\n")
-
-
 
 
 

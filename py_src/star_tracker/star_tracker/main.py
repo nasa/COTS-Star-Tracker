@@ -12,7 +12,7 @@ of stars
 ################################
 #LOAD LIBRARIES
 ################################
-from support_functions import timing_decorator, reproject
+from support_functions import timing_decorator
 
 ################################
 #SUPPORT FUNCTIONS
@@ -63,7 +63,6 @@ def star_tracker(img_file_name, cam_config_file_name, m=None, q=None, x_cat=None
         max_star_area = 36
         if verbose: print('WARNING ['+str(__name__)+']: min_star_area greater than or equal to max_star_area.  Both have been reset to their default values.')
 
-
     centroids, intensities = support_functions.find_candidate_stars(
         img, min_star_area=min_star_area, max_star_area=max_star_area,
         low_thresh=low_thresh_pxl_intensity, hi_thresh=hi_thresh_pxl_intensity, graphics=graphics)
@@ -71,11 +70,18 @@ def star_tracker(img_file_name, cam_config_file_name, m=None, q=None, x_cat=None
     # if fewer than 3 centroids are found, don't bother.  Gums things up downstream.
     if len(centroids) < 3:
         x_obs = np.array(np.nan)
-        q_est = np.array(np.nan)
+        q_est = np.empty((4, ))
+        q_est.fill(np.nan)
         idmatch = [0]
         nmatches = 0
         if verbose: print("Found too few centroids (< 3) to continue.  Exiting...")
+        q_est[3] = 400 # error code for failure to find sufficient nmatch
+        q_est[0] = int(np.average(img)) # error details-- capture average pixel value
+        q_est[1] = nmatches # error details-- capture nmatches
+        q_est[2] = len(centroids) # error details-- capture number of centroids
         return q_est, idmatch, nmatches, x_obs, img
+
+    if verbose: print("Found " + str(len(centroids)) + " centroids")
 
     if undist_img_bool is True:
         centroidsUnd = centroids.reshape(len(centroids), 1, 2)
@@ -103,14 +109,13 @@ def star_tracker(img_file_name, cam_config_file_name, m=None, q=None, x_cat=None
     original_num_centroids = len(intensities)
     n_stars = min(len(intensities), n_stars)
     bright_star_idx = intensities.argsort()[-n_stars:]
-    centroids = centroids[bright_star_idx, :]
-    if verbose: print("Using " + str(len(centroids)) + " centroids")
-
+    centroids_subset = centroids[bright_star_idx, :]
+    if verbose: print("Using " + str(len(centroids)) + " centroids for matching")
 
     if graphics is True and (original_num_centroids > n_stars):
         import matplotlib.pyplot as plt
         mask = np.zeros((img.shape[0],img.shape[1]))
-        for centroid in centroids:
+        for centroid in centroids_subset:
             cv2.circle(mask, (int(centroid[0]), int(centroid[1])), 30, (255, 255, 255), 5)
             cv2.circle(mask, (int(centroid[0]), int(centroid[1])), radius=0, color=(255, 255, 255), thickness=-1)
 
@@ -118,7 +123,7 @@ def star_tracker(img_file_name, cam_config_file_name, m=None, q=None, x_cat=None
         fig = plt.figure()
         plt.imshow(img, cmap="Greys_r")
         plt.imshow(mask, cmap="gist_rainbow")
-        plt.title("Greyscale image with selected centroids")
+        plt.title("Greyscale image with brightest n_stars ("+str(n_stars)+") used for matching")
         fig.tight_layout()
         plt.show()
 
@@ -126,7 +131,7 @@ def star_tracker(img_file_name, cam_config_file_name, m=None, q=None, x_cat=None
 
     # Corrected centroids in unit vectors
     x_obs = 0
-    x_obs = xforms.pixel2vector(cinv, centroids.T)
+    x_obs = xforms.pixel2vector(cinv, centroids_subset.T)
     if verbose:
         print("x_obs[0] is length "+str(len(x_obs[0])))
 
@@ -144,16 +149,21 @@ def star_tracker(img_file_name, cam_config_file_name, m=None, q=None, x_cat=None
         q_est, idmatch, nmatches = rpi_core.triangle_isa_id(x_obs, x_cat, indexed_star_pairs, isa_thresh,
                                                             nmatch, k, k_vector_interp, watchdog=watchdog, verbose=verbose)
 
-        if graphics is True and nmatches > 0:
+        if graphics is True and nmatches >= nmatch:
 
-            #reproject(img, camera_matrix, x_obs=x_obs_found, x_inv=x_obs_invalid, cat_found=cat_found, cat_nfound=cat_nfound)
-            reproject(img, camera_matrix, idmatch, q_est, x_obs=x_obs, x_cat=x_cat)
+            #support_functions.reproject(img, camera_matrix, x_obs=x_obs_found, x_inv=x_obs_invalid, cat_found=cat_found, cat_nfound=cat_nfound)
+            support_functions.reproject(img, camera_matrix, idmatch, q_est, x_obs=x_obs, x_cat=x_cat)
             # matched candidates: pixel position of the blob that we think is a star
             # invalid candidates: pixel position of a blob we found, but that we don't think are stars
             # matched catalog stars: this is where the star should be assuming the quat is true
             # unmatched catalog stars: this is where a catalog star should be, but we couldn't find it (or maybe it wasn't bright enough to be considered)
 
+    if (q_est[3] == 400) or (q_est[3] == 401) or (q_est[3] == 402) or (q_est[3] == 408): q_est[2] = len(centroids_subset) # error details-- capture number of centroids for timeout or solve fail
 
+    if verbose:
+        print("quaternion [v0,v1,v2,s]: " + str(q_est))
+        #print(idmatch)
+        print("number of matches: " + str(nmatches))
 
     # Return x_obs and the img
     return q_est, idmatch, nmatches, x_obs, img
