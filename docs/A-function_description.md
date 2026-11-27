@@ -1,5 +1,5 @@
 
-# Appendix: Function Description
+# Appendix A: Function Description
 
 Note: this section is still in work.
 

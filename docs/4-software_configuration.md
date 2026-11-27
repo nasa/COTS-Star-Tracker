@@ -128,10 +128,10 @@ a unit quaternion to minimize confusion.  Many navigation systems also employ un
 existing rejection logic while also minimizing the output complexity of the star tracker algorithm.
 
 The primary indicator of the type of solve failure experienced by the algorithm is captured in the last output field of the quaternion, which is typically occupied by the scalar.  These outputs can be:
-    * 400: an error code specifying a failure to find a sufficient number of centroids in the frame
-	* 401: an error code specifying an insufficient number of matches vs the input nmatch threshold (fewer x_obs than nmatch)
-    * 402: an error code specifying an insufficient number of matches vs the input nmatch threshold (end of the nmatch loop without hitting nmatches)
-    * 408: an error code specifying the watchdog timeout was reached and solving halted
+* 400: an error code specifying a failure to find a sufficient number of centroids in the frame
+* 401: an error code specifying an insufficient number of matches vs the input nmatch threshold (fewer x_obs than nmatch)
+* 402: an error code specifying an insufficient number of matches vs the input nmatch threshold (end of the nmatch loop without hitting nmatches)
+* 408: an error code specifying the watchdog timeout was reached and solving halted
 
 Each error code then provides different information to maximize the relevance of the information specific to the failure type.
 

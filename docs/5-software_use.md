@@ -23,7 +23,7 @@ be noted that it's up to the user to determine the appropriate level of rigor to
     * Again, note the output quaternion is right-handed, scalar last.
 3. Utilize a verified tool to process the gathered images and create a "truth" reference to which the system performance can be performed.
     * The COTS Star Tracker can be used with astrometry.net to create a reference "truth" data set.  NOTE: this requires an internet connection.
-        * create an account on astrometry.net and create an API key.
+        * create an account on astrometry.net and create an API key. (see https://nova.astrometry.net/api_help)
         * place the key in tools/astrometry_process.py
         * add the path to the directory with the images you'd like to process into the script.
         * run the script to automatically have astrometry.net solve the images and record the results: sudo python3 astrometry_process.py
@@ -48,7 +48,7 @@ This step describes a possible way to integrate the star tracker algorithm into 
 be noted that it's up to the user to determine their sensor performance and flight software integration requirements.
 
 1. Take an image when commanded by a master function or take an image at a set rate.
-2. Immediately process the image (and optionally save it as well).
+2. Immediately (time association is critical) process the image (and optionally save it as well).
 3. Return the resulting attitude to the appropriate function or process.
 4. Repeat.
 
